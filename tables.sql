@@ -6,7 +6,7 @@ CREATE TABLE uporabnik (
 
 CREATE TABLE fantasy_ekipa (
     f_ekipa_id PRIMARY KEY,
-    točke INT NOT NULL,
+    tocke INT NOT NULL,
     lastnik INT NOT NULL REFERENCES uporabnik(uporabnik_id),
     ime_ekipe TEXT NOT NULL
 );
@@ -50,6 +50,6 @@ CREATE TABLE podatki_o_tekmi (
     skoki INT,
     podaje INT,
     odigrane_minute INT,
-    točke INT,
+    tocke INT,
     izid BOOLEAN -- 1 pomeni zmago, 0 poraz
 );
