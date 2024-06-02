@@ -41,7 +41,7 @@ import base64, cgi, email.utils, functools, hmac, itertools, mimetypes,\
 from datetime import date as datedate, datetime, timedelta
 from tempfile import TemporaryFile
 from traceback import format_exc, print_exc
-from inspect import getargspec
+from inspect import getfullargspec
 from unicodedata import normalize
 
 

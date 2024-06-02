@@ -3,3 +3,6 @@ pandas
 beautifulsoup4
 lxml
 bottle
+psycopg2-binary
+dataclasses-json
+bcrypt

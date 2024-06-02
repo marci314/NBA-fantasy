@@ -1,3 +1,23 @@
+GRANT ALL ON DATABASE sem2024_marcelb TO jostp WITH GRANT OPTION;
+GRANT ALL ON SCHEMA public TO jostp WITH GRANT OPTION;
+GRANT ALL ON DATABASE sem2024_marcelb TO gasperdr WITH GRANT OPTION;
+GRANT ALL ON SCHEMA public TO gasperdr WITH GRANT OPTION;
+GRANT ALL ON DATABASE sem2024_marcelb TO majg WITH GRANT OPTION;
+GRANT ALL ON SCHEMA public TO majg WITH GRANT OPTION;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO gasperdr WITH GRANT OPTION;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO gasperdr WITH GRANT OPTION;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO majg WITH GRANT OPTION;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO majg WITH GRANT OPTION;
+
+DROP TABLE IF EXISTS podatki_o_tekmi;
+DROP TABLE IF EXISTS tekma;
+DROP TABLE IF EXISTS ekipa;
+DROP TABLE IF EXISTS trener;
+DROP TABLE IF EXISTS igralec;
+DROP TABLE IF EXISTS fantasy_ekipa;
+DROP TABLE IF EXISTS uporabnik;
+
+
 CREATE TABLE uporabnik (
     uporabnik_id PRIMARY KEY,
     uporabnisko_ime TEXT NOT NULL,
@@ -39,11 +59,11 @@ CREATE TABLE tekma (
 );
 
 CREATE TABLE podatki_o_tekmi (
-    id_igralca FOREIGN KEY REFERENCES igralec(igralec_id),
-    id_tekme FOREIGN KEY REFERENCES tekma(tekma_id),
-    id_trenerja FOREIGN KEY REFERENCES trener(trener_id),
-    id_ekipa FOREIGN KEY REFERENCES ekipa(ekipa_id),
-    odstotek_meta FLOAT, -- Pa če ni metal niti enkrat?
+    id_igralca TEXT,
+    id_tekme SERIAL,
+    id_trenerja TEXT,
+    id_ekipa INT,
+    odstotek_meta FLOAT, 
     ukradene INT,
     bloki INT,
     izgubljene INT,
@@ -51,5 +71,9 @@ CREATE TABLE podatki_o_tekmi (
     podaje INT,
     odigrane_minute INT,
     tocke INT,
-    izid BOOLEAN -- 1 pomeni zmago, 0 poraz
+    izid BOOLEAN,
+    FOREIGN KEY (id_igralca) REFERENCES igralec(igralec_id),
+    FOREIGN KEY (id_tekme) REFERENCES tekma(id_tekma),
+    FOREIGN KEY (id_trenerja) REFERENCES trener(trener_id),
+    FOREIGN KEY (id_ekipa) REFERENCES ekipa(ekipa_id)
 );
