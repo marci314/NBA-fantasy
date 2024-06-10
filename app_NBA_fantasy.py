@@ -1,23 +1,101 @@
 from bottle import Bottle, run, request, static_file, template, redirect
 from bottleext import *
-import psycopg2
+import psycopg2, psycopg2.extensions, psycopg2.extras
 import hashlib
-
+import Data.auth_public as auth_public
+from functools import wraps
+from Data.Modeli import *
+from Data.Services import AuthService
+from database import Repo
 import os
+
+repo = Repo()
+
 SERVER_PORT = os.environ.get('BOTTLE_PORT', 8080)
 RELOADER = os.environ.get('BOTTLE_RELOADER', True)
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
-app = Bottle()
 
-## Funkcija za povezavo z bazo
-def get_db_connection():
-    return psycopg2.connect(
-        dbname='sem2024_marcelb',  
-        user = 'javnost',
-        password = 'javnogeslo',
-        host='baza.fmf.uni-lj.si'
-    )
+conn = psycopg2.connect(database=auth_public.db, host=auth_public.host, user=auth_public.user, password=auth_public.password, port=DB_PORT)
+cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
+
+def password_hash(s):
+    h = hashlib.sha512()
+    h.update(s.encode('utf-8'))
+    return h.hexdigest()
+
+@get('/')
+def osnovna_stran():
+    return template('base_screen.html')
+
+def cookie_required(f):
+    """
+    Dekorator, ki zahteva veljaven piškotek. Če piškotka ni, uporabnika preusmeri na stran za prijavo.
+    """
+    @wraps(f)
+    def decorated( *args, **kwargs):
+        cookie = request.get_cookie("username")
+        if cookie:
+            return f(*args, **kwargs)
+        return template('prijava.html')
+    return decorated
+
+@get('/prijava') 
+def prijava_get():
+    return template("prijava.html")
+
+@post('/prijava') 
+def prijava_post():
+    uporabnisko_ime = request.forms.get('uporabnisko_ime')
+    geslo = password_hash(request.forms.get('geslo'))
+    
+    if uporabnisko_ime is None or geslo is None:
+        redirect(url('prijava_get'))
+    
+    try: 
+        cur.execute('SELECT geslo FROM uporabnik WHERE uporabnisko_ime = %s', [uporabnisko_ime])
+        hashBaza = cur.fetchone()[0]
+        cur.execute('SELECT uporabnik_id FROM uporabnik WHERE uporabnisko_ime = %s', [uporabnisko_ime])
+        id_uporabnika = cur.fetchone()[0]
+    except:
+        hashBaza = None
+
+    if hashBaza is None:
+        redirect(url('prijava_get'))
+        return
+
+    if geslo != hashBaza:
+        redirect(url('prijava_get'))
+        return
+    
+    response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
+    redirect(url('profile_get', id_uporabnika=id_uporabnika))
+
+@get('/odjava')
+def odjava():
+    response.delete_cookie("username")
+    response.delete_cookie("password")
+    return template('base_screen.html', napaka=None)
+
+@get('/registracija')
+def registracija_get():
+    return template('login.html')
+
+@post('/registracija')
+def registracija_post():
+    name = request.forms.name
+    username = request.forms.username
+    password = password_hash(request.forms.password)
+    patronus = random.choice(animals)
+    question1 = request.forms.get('question1')
+    question2 = request.forms.get('question2')
+    question3 = request.forms.get('question3')
+    question4 = request.forms.get('question4')
+    question5 = request.forms.get('question5')
+    house_id = dodaj_house(question1, question2, question3, question4, question5)
+    student1=Student(name=name, house_id=house_id, patronus=patronus, username=username, password=password)
+    repo.dodaj_student(student1)
+    redirect(url('osnovna_stran'))
 
 # Funkcija za preverjanje uporabniškega imena in gesla
 def validate_user(username, password):
@@ -57,7 +135,7 @@ def register_user(username, password):
 @app.route('/')
 def login_page():
     # Preveri, če je uporabnik že prijavljen preko piškotka
-    username = request.get_cookie("username")
+    username = request.get_cookie("username", secret=skrivnost)
     if username:
         return template('<b>Pozdravljeni, {{username}}!</b>', username=username)
     else:
@@ -75,7 +153,7 @@ def handle_form():
     if action == 'login':
         user = validate_user(username, password)
         if user:
-            response.set_cookie("username", username, path='/')
+            response.set_cookie("username", username, path='/', secret=skrivnost)
             return template('<b>Pozdravljeni, {{username}}!</b>', username=username)
         else:
             return template('<b>Napaka: Uporabniško ime in geslo se ne ujemata.</b>')
@@ -84,7 +162,7 @@ def handle_form():
             return template('<b>Napaka: Uporabniško ime že obstaja.</b>')
         else:
             register_user(username, password)
-            return template('<b>Registracija uspešna. Sedaj se lahko prijavite.</b>')
+            return template('<b>Registracija uspešna.</b>')
 
 @app.route('/static/<filename>')
 def serve_static(filename):
@@ -92,3 +170,15 @@ def serve_static(filename):
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)
+
+
+
+@app.route('/home')
+def home():
+    # Fetch player data from the database
+    cur.execute("""
+        SELECT igralec_id, ime, priimek, pozicija, visina, rojstvo 
+        FROM igralec
+    """)
+    players = cur.fetchall()
+    return template('home', players=players)
