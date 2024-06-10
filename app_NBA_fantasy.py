@@ -86,15 +86,8 @@ def registracija_post():
     name = request.forms.name
     username = request.forms.username
     password = password_hash(request.forms.password)
-    patronus = random.choice(animals)
-    question1 = request.forms.get('question1')
-    question2 = request.forms.get('question2')
-    question3 = request.forms.get('question3')
-    question4 = request.forms.get('question4')
-    question5 = request.forms.get('question5')
-    house_id = dodaj_house(question1, question2, question3, question4, question5)
-    student1=Student(name=name, house_id=house_id, patronus=patronus, username=username, password=password)
-    repo.dodaj_student(student1)
+    
+    repo.dodaj_uporabnika(uporabnik)
     redirect(url('osnovna_stran'))
 
 # Funkcija za preverjanje uporabniškega imena in gesla
@@ -132,37 +125,6 @@ def register_user(username, password):
     cursor.close()
     conn.close()
 
-@app.route('/')
-def login_page():
-    # Preveri, če je uporabnik že prijavljen preko piškotka
-    username = request.get_cookie("username", secret=skrivnost)
-    if username:
-        return template('<b>Pozdravljeni, {{username}}!</b>', username=username)
-    else:
-        return static_file('login.html', root='./views')
-
-@app.route('/handle_form', method='POST')
-def handle_form():
-    username = request.forms.get('username')
-    password = request.forms.get('password')
-    action = request.forms.get('action')
-
-    if not username or not password:
-        return template('<b>Napaka: Uporabniško ime in geslo sta obvezna.</b>')
-
-    if action == 'login':
-        user = validate_user(username, password)
-        if user:
-            response.set_cookie("username", username, path='/', secret=skrivnost)
-            return template('<b>Pozdravljeni, {{username}}!</b>', username=username)
-        else:
-            return template('<b>Napaka: Uporabniško ime in geslo se ne ujemata.</b>')
-    elif action == 'register':
-        if user_exists(username):
-            return template('<b>Napaka: Uporabniško ime že obstaja.</b>')
-        else:
-            register_user(username, password)
-            return template('<b>Registracija uspešna.</b>')
 
 @app.route('/static/<filename>')
 def serve_static(filename):
