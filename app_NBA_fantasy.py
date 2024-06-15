@@ -144,3 +144,35 @@ def home():
     """)
     players = cur.fetchall()
     return template('home', players=players)
+
+@app.route('/moja_ekipa/<ime_ekipe>')
+def moja_ekipa(ime_ekipe):
+    ekipa = your_database_connection.pokazi_ekipo(ime_ekipe)
+    if not ekipa:
+        return "Ekipa ni najdena."
+    return template('moja_ekipa', ekipa=ekipa)
+
+@app.route('/izberi_datum', method=['GET', 'POST'])
+def izberi_datum():
+    if request.method == 'POST':
+        izbrani_datum = request.forms.get('datum')
+        izbrani_datum = datetime.datetime.strptime(izbrani_datum, '%Y-%m-%d').date()
+        
+        # Uporabi funkcijo odigraj_teden iz instance db
+        rezultat = db.odigraj_teden(izbrani_datum)
+        
+        return template('odigrane_tekme', rezultat=rezultat)
+    
+    return template('izberi_datum_form')
+
+# HTML predloga za obrazec za izbiro datuma
+@route('/izberi_datum_form')
+def izberi_datum_form():
+    return '''
+        <form action="/izberi_datum" method="post">
+            <label for="datum">Izberite datum:</label>
+            <input type="date" id="datum" name="datum" required>
+            <button type="submit">Izberi</button>
+        </form>
+    '''
+

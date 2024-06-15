@@ -47,6 +47,12 @@ CREATE Table trener (
     rojstvo DATE
 );
 
+CREATE TABLE fantasy_ekipa_trener (
+    f_ekipa_id INT REFERENCES fantasy_ekipa(f_ekipa_id),
+    trener_id INT REFERENCES trener(trener_id),
+    PRIMARY KEY (f_ekipa_id, trener_id)
+);
+
 CREATE TABLE ekipa (
     ekipa_id PRIMARY KEY
 );
@@ -76,4 +82,11 @@ CREATE TABLE podatki_o_tekmi (
     FOREIGN KEY (id_tekme) REFERENCES tekma(id_tekma),
     FOREIGN KEY (id_trenerja) REFERENCES trener(trener_id),
     FOREIGN KEY (id_ekipa) REFERENCES ekipa(ekipa_id)
+);
+
+#rabva eno tabelo k bo povezovala igralcev id in od ekipe id...
+CREATE TABLE fantasy_ekipa_igralci (
+    f_ekipa_id INT REFERENCES fantasy_ekipa(f_ekipa_id),
+    igralec_id INT REFERENCES igralec(igralec_id),
+    PRIMARY KEY (f_ekipa_id, igralec_id)
 );

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <title>Moja Ekipa</title>
+</head>
+<body>
+    <h1>{{ekipa['ime_ekipe']}}</h1>
+    <p>Točke: {{ekipa['tocke']}}</p>
+    
+    <h2>Igralci</h2>
+    <ul>
+        % for igralec in ekipa['igralci']:
+            <li>{{igralec['ime']}} {{igralec['priimek']}} - {{igralec['pozicija']}}</li>
+        % end
+    </ul>
+    
+    <h2>Trenerji</h2>
+    <ul>
+        % for trener in ekipa['trenerji']:
+            <li>{{trener['ime']}} {{trener['priimek']}}</li>
+        % end
+    </ul>
+</body>
+</html>
