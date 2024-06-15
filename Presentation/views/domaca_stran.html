@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,24 +10,32 @@
             margin: 0;
             padding: 0;
             background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            width: 80%;
-            margin: 0 auto;
+            width: 320px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            padding-top: 50px;
         }
         .logo {
             margin-bottom: 20px;
         }
         .btn {
-            padding: 10px 20px;
+            width: 100%;
+            padding: 10px;
             font-size: 16px;
             background-color: #007bff;
             color: #fff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-bottom: 10px;
             transition: background-color 0.3s ease;
         }
         .btn:hover {
@@ -38,11 +46,12 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="pot/do/tvojega/logoja.png" alt="NBA Fantasy League Logo">
+            <img src="/static/nba-logo.jpg" alt="NBA Fantasy League Logo">
         </div>
         <h1>NBA Fantasy League</h1>
         <p>Dobrodošli v NBA Fantasy ligi!</p>
-        <button class="btn">Vstop</button>
+        <button class="btn" onclick="window.location.href='prijava.html'">Prijava</button>
+        <button class="btn" onclick="window.location.href='registracija.html'">Registracija</button>
     </div>
 </body>
 </html>

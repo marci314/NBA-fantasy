@@ -1,32 +1,29 @@
-from bottle import Bottle, run, request, static_file, template, redirect
-from bottleext import *
-import psycopg2, psycopg2.extensions, psycopg2.extras
-import hashlib
-import Data.auth_public as auth_public
-from functools import wraps
-from Data.Modeli import *
-from Data.Services import AuthService
-from database import Repo
+from Presentation.bottleext import *
+import psycopg2, psycopg2.extras
 import os
+from functools import wraps
+from Services.auth_service import AuthService
+from database import Repo
+import Data.auth_public as auth_public
 
+# Inicializacija aplikacije in povezave z bazo
+app = Bottle()
+
+# Povezava z bazo podatkov
+conn = psycopg2.connect(
+    database=auth_public.dbname,
+    host=auth_public.host,
+    user=auth_public.user,
+    password=auth_public.password
+)
+cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 repo = Repo()
-
-SERVER_PORT = os.environ.get('BOTTLE_PORT', 8080)
-RELOADER = os.environ.get('BOTTLE_RELOADER', True)
-DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
-
-
-conn = psycopg2.connect(database=auth_public.db, host=auth_public.host, user=auth_public.user, password=auth_public.password, port=DB_PORT)
-cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
+auth_service = AuthService(repo)
 
 def password_hash(s):
     h = hashlib.sha512()
     h.update(s.encode('utf-8'))
     return h.hexdigest()
-
-@get('/')
-def osnovna_stran():
-    return template('base_screen.html')
 
 def cookie_required(f):
     """
@@ -34,42 +31,33 @@ def cookie_required(f):
     """
     @wraps(f)
     def decorated( *args, **kwargs):
-        cookie = request.get_cookie("username")
+        cookie = request.get_cookie("uporabnik")
         if cookie:
             return f(*args, **kwargs)
-        return template('prijava.html')
+        return template('prijava.html', uporabnik=None, napaka="Potrebna je prijava!")
     return decorated
+
+@route('/static/<filename:path>')
+def static(filename):
+    return static_file(filename, root='Presentation/static')
+
 
 @get('/prijava') 
 def prijava_get():
     return template("prijava.html")
 
-@post('/prijava') 
+@get('/prijava', method='POST')
 def prijava_post():
     uporabnisko_ime = request.forms.get('uporabnisko_ime')
-    geslo = password_hash(request.forms.get('geslo'))
-    
-    if uporabnisko_ime is None or geslo is None:
-        redirect(url('prijava_get'))
-    
-    try: 
-        cur.execute('SELECT geslo FROM uporabnik WHERE uporabnisko_ime = %s', [uporabnisko_ime])
-        hashBaza = cur.fetchone()[0]
-        cur.execute('SELECT uporabnik_id FROM uporabnik WHERE uporabnisko_ime = %s', [uporabnisko_ime])
-        id_uporabnika = cur.fetchone()[0]
-    except:
-        hashBaza = None
+    geslo = request.forms.get('geslo')
 
-    if hashBaza is None:
-        redirect(url('prijava_get'))
-        return
+    user = auth_service.prijavi_uporabnika(uporabnisko_ime, geslo)
 
-    if geslo != hashBaza:
-        redirect(url('prijava_get'))
-        return
-    
-    response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
-    redirect(url('profile_get', id_uporabnika=id_uporabnika))
+    if isinstance(user, UporabnikDTO):
+        response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
+        return redirect(url('home'))
+    else:
+        return template('prijava.html', napaka="Nepravilno uporabniško ime ali geslo!")
 
 @get('/odjava')
 def odjava():
@@ -79,16 +67,40 @@ def odjava():
 
 @get('/registracija')
 def registracija_get():
-    return template('login.html')
+    return template('registracija.html')
 
-@post('/registracija')
+@route('/registracija', method='POST')
 def registracija_post():
-    name = request.forms.name
-    username = request.forms.username
-    password = password_hash(request.forms.password)
+    uporabnisko_ime = request.forms.get('username')
+    geslo = request.forms.get('password')
+
+    if auth_service.ali_obstaja_uporabnik(uporabnisko_ime):
+        return template('registracija.html', napaka="Uporabniško ime že obstaja.")
     
-    repo.dodaj_uporabnika(uporabnik)
-    redirect(url('osnovna_stran'))
+    try:
+        auth_service.dodaj_uporabnika(uporabnisko_ime, geslo)
+        return redirect(url('prijava_get'))
+    except Exception as e:
+        return template('registracija.html', napaka=f"Napaka pri ustvarjanju računa: {str(e)}")
+
+@route('/home')
+@cookie_required
+def home():
+    cur.execute("""
+        SELECT igralec_id, ime, priimek, pozicija, visina, rojstvo 
+        FROM igralec
+    """)
+    players = cur.fetchall()
+    return template('home', players=players)
+
+@route('/moja_ekipa/<ime_ekipe>')
+@cookie_required
+def moja_ekipa(ime_ekipe):
+    ekipa = repo.pokazi_ekipo(ime_ekipe)
+    if not ekipa:
+        return "Ekipa ni najdena."
+    return template('moja_ekipa.html', ekipa=ekipa)
+
 
 # Funkcija za preverjanje uporabniškega imena in gesla
 def validate_user(username, password):
@@ -101,32 +113,8 @@ def validate_user(username, password):
     conn.close()
     return user
 
-# Funkcija za preverjanje ali uporabniško ime že obstaja
-def user_exists(username):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM uporabnik WHERE uporabnisko_ime = %s', (username,))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return user
 
-# Funkcija za registracijo novega uporabnika
-def register_user(username, password):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    try:
-        cursor.execute('INSERT INTO uporabnik (uporabnisko_ime, geslo) VALUES (%s, %s)', (username, hashed_password))
-        conn.commit()
-    except Exception as e:
-        print(e)
-        conn.rollback()
-    cursor.close()
-    conn.close()
-
-
-@app.route('/static/<filename>')
+@route('/static/<filename>')
 def serve_static(filename):
     return static_file(filename, root='./static')
 
@@ -135,7 +123,7 @@ if __name__ == '__main__':
 
 
 
-@app.route('/home')
+@route('/home')
 def home():
     # Fetch player data from the database
     cur.execute("""
@@ -143,16 +131,16 @@ def home():
         FROM igralec
     """)
     players = cur.fetchall()
-    return template('home', players=players)
+    return template('homescreen', players=players)
 
-@app.route('/moja_ekipa/<ime_ekipe>')
+@route('/moja_ekipa/<ime_ekipe>')
 def moja_ekipa(ime_ekipe):
     ekipa = your_database_connection.pokazi_ekipo(ime_ekipe)
     if not ekipa:
         return "Ekipa ni najdena."
     return template('moja_ekipa', ekipa=ekipa)
 
-@app.route('/izberi_datum', method=['GET', 'POST'])
+@route('/izberi_datum', method=['GET', 'POST'])
 def izberi_datum():
     if request.method == 'POST':
         izbrani_datum = request.forms.get('datum')

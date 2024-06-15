@@ -1,4 +1,4 @@
-from datetime import datetime as dt, timedelta
+import datetime
 import psycopg2, psycopg2.extensions, psycopg2.extras
 from typing import List, TypeVar, Type, Callable
 from Data.Modeli import *    
@@ -11,34 +11,39 @@ class Repo:
         self.conn = psycopg2.connect(database=auth_public.db, host=auth_public.host, user=auth_public.user, password=auth_public.password, port=5432)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    def dodaj_uporabnika(self, uporabnik: Uporabnik):
+        """
+        Doda novega uporabnika v tabelo 'uporabnik'.
+        """
+        self.cur.execute("""
+            INSERT INTO uporabnik (uporabnisko_ime, password_hash, last_login)
+            VALUES (%s, %s, %s)
+            """, (uporabnik.uporabnisko_ime, uporabnik.password_hash, uporabnik.last_login))
+        self.conn.commit()
+
+    def klice_uporabnika(self, username:str) -> Uporabnik:
+        self.cur.execute("""
+            SELECT username, password_hash, last_login
+            FROM uporabnik
+            WHERE username = %s
+        """, (username,))
+         
+        user = Uporabnik.from_dict(self.cur.fetchone())
+        return user
     
+    def posodobi_uporabnika(self, uporabnik: Uporabnik):
+        self.cur.execute("""
+            Update uporabnik set last_login = %s where username = %s
+            """, (uporabnik.last_login,uporabnik.username))
+        self.conn.commit()
+    
+
     def tabela_uporabnik(self) -> List[Uporabnik]:
         self.cur.execute("""
             SELECT * FROM uporabnik
         """)
         return [Uporabnik(uporabnik_id, uporabnisko_ime, geslo) for (uporabnik_id, uporabnisko_ime, geslo) in self.cur.fetchall()]
 
-    def dodaj_uporabnika(self, uporabnik: Uporabnik) -> Uporabnik:
-        # Preveri, ali uporabnik že obstaja v tabeli
-        self.cur.execute("""
-            SELECT * FROM uporabnik
-            WHERE uporabnisko_ime = %s
-            """, (uporabnik.uporabnisko_ime,))
-        row = self.cur.fetchone()
-        if row:
-            uporabnik.uporabnik_id = row['uporabnik_id']
-            return uporabnik
-        
-        # Vstavi novega uporabnika
-        self.cur.execute("""
-            INSERT INTO uporabnik (uporabnisko_ime, geslo)
-            VALUES (%s, %s)
-            RETURNING uporabnik_id
-            """, (uporabnik.uporabnisko_ime, uporabnik.geslo))
-        
-        uporabnik.uporabnik_id = self.cur.fetchone()['uporabnik_id']
-        self.conn.commit()
-        return uporabnik
 
     def dodaj_igralca_v_fantasy_ekipo(self, f_ekipa_id: int, igralec_id: str) -> None:
          # Preveri, ali ima ekipa že 5 igralcev
@@ -188,7 +193,7 @@ class Repo:
 
         return result
 
-    import datetime
+    
 
 
     def odigraj_teden(self, izbrani_datum: datetime.date) -> str:

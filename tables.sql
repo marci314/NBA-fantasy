@@ -21,7 +21,8 @@ DROP TABLE IF EXISTS uporabnik;
 CREATE TABLE uporabnik (
     uporabnik_id PRIMARY KEY,
     uporabnisko_ime TEXT NOT NULL,
-    geslo TEXT NOT NULL
+    password_hash TEXT NOT NULL,
+    last_login DATE
 );
 
 CREATE TABLE fantasy_ekipa (
