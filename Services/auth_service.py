@@ -1,4 +1,4 @@
-from database import Repo
+from Data.database import Repo
 from Data.Modeli import *
 from typing import Union
 import bcrypt

@@ -1,16 +1,21 @@
 import datetime
-import psycopg2, psycopg2.extensions, psycopg2.extras
+import psycopg2, psycopg2.extensions, psycopg2.extras, os
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) 
 from typing import List, TypeVar, Type, Callable
-from Data.Modeli import *    
+from Data.Modeli import *
 from datetime import date
-from Data.auth_public import auth_public
+import Data.auth_public as auth
+
+# Preberemo port za bazo iz okoljskih spremenljivk
+DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
 class Repo:
 
     def __init__(self):
-        self.conn = psycopg2.connect(database=auth_public.db, host=auth_public.host, user=auth_public.user, password=auth_public.password, port=5432)
+        # Ko ustvarimo novo instanco definiramo objekt za povezavo in cursor
+        self.conn = psycopg2.connect(database=auth.dbname, host=auth.host, user=auth.user, password=auth.password, port=DB_PORT)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
+    
     def dodaj_uporabnika(self, uporabnik: Uporabnik):
         """
         Doda novega uporabnika v tabelo 'uporabnik'.
