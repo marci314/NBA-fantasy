@@ -101,7 +101,6 @@ class TekmaDTO:
 class PodatkiOTekmi:
     id_igralca: str = field(default="")
     id_tekme: int = field(default=0)
-    id_trenerja: str = field(default="")
     id_ekipa: int = field(default=0)
     odstotek_meta: Optional[float] = field(default=0.0)
     ukradene: int = field(default=0)
@@ -118,7 +117,6 @@ class PodatkiOTekmi:
 class PodatkiOTekmiDTO:
     id_igralca: str = field(default="")
     id_tekme: int = field(default=0)
-    id_trenerja: str = field(default="")
     id_ekipa: int = field(default=0)
     odstotek_meta: Optional[float] = field(default=0.0)
     ukradene: int = field(default=0)

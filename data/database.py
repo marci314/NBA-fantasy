@@ -5,6 +5,7 @@ from typing import List, TypeVar, Type, Callable
 from Data.Modeli import *
 from datetime import date
 import Data.auth_public as auth
+import math
 
 # Preberemo port za bazo iz okoljskih spremenljivk
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
@@ -256,3 +257,85 @@ class Repo:
         # Commit spremembe
         self.conn.commit()
         return "Tekma je bila uspešno odigrana."
+
+    def izracunaj_tocke(self, podatki: PodatkiOTekmi) -> int:
+        '''Funkcija na podlagi igralčeve statistike izračuna, koliko fantasy točk si je prislužil.
+        Igralec dobi točko za vsako skok in asistenco, dve točki za vsako ukradeno žogo ali blok,
+        minus dve točki za vsako izgubljeno žogo.
+        Poleg tega dobi točke na podlagi tega, koliko točk je prinesel ekipi, vendar skalirano glede na odstotek meta iz igre.
+        Dodatno dobi pet točk bonusa, če je njegova ekipa zmagala.'''
+        tocke = 5 * podatki.izid + podatki.tocke * (0.2 + podatki.odstotek_meta) + podatki.skoki + podatki.podaje + 2 * podatki.bloki + 2 * podatki.ukradene - 2 * podatki.izgubljene
+        return math.floor(tocke)
+
+# alternativen odigraj_teden za minimalni vzorec podatkov: (tu je pogoj, da se v tabelo tekma doda nek nov stolpec s tedni kot integerji)
+    def odigraj_teden2(self, st_tedna) -> str:
+        '''Izvede tekme za naslednji teden in prišteje točke ekipam.'''
+        # Preveri, ali so podatki o tekmi za naslednji teden na voljo
+        self.cur.execute("""
+            SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum 
+            FROM tekma
+            WHERE teden = %s 
+            """, (st_tedna,)) 
+        tekme = self.cur.fetchall()
+
+        if not tekme:
+            return "Za izbrani datum ni podatkov o tekmah za naslednji teden."
+        
+        # Izvedi tekme za naslednji teden
+        for tekma in tekme:
+            id_tekma = tekma['id_tekma']
+            rezultat = self.odigraj_tekmo(id_tekma)
+            print(rezultat)  # Izpis rezultata vsake odigrane tekme
+        
+        return "Tekme za naslednji teden so bile uspešno odigrane."
+
+    def odigraj_tekmo(self, id_tekme: int) -> str:
+        '''Izvede tekmo in prišteje točke ekipam.'''
+        
+        # Pridobi podatke o tekmi
+        self.cur.execute("""
+            SELECT * 
+            FROM podatki_o_tekmi
+            WHERE id_tekme = %s
+            """, (id_tekme,))
+        podatki_tekme = self.cur.fetchall()
+
+        if not podatki_tekme:
+            return "Ni podatkov o tekmi s tem ID."
+
+        # Posodobi točke ekip glede na podatke o tekmi
+        for podatki_o_tekmi in podatki_tekme:
+            t = self.izracunaj_tocke(podatki_o_tekmi)
+            self.cur.execute("""
+            INSERT INTO igralci_tekme (id_igralca, id_tekme, tocke) 
+            VALUES (%s, %s, %s);      
+            """, (podatki_o_tekmi.id_igralca, podatki_o_tekmi.id_tekme, t))
+            
+        # Dodaj točke fantazijskim ekipam (izbere vse igralce na tekmi, nato za vsakega igralca posebej doda točke vsem ekipam, ki ga imajo)
+        self.cur.execute("""                      
+            WHERE id_tekme = %s"""
+        ), (id_tekme)
+        rows = self.cur.fetchall()
+        for row in rows:
+            id_igr = row[0]
+            tocke_igr = row[1]
+                                            
+            self.cur.execute("""
+                SELECT f_ekipa_id 
+                FROM fantasy_ekipa_igralci
+                WHERE igralec_id = %s
+                """, (id_igr,))
+            ekipe = self.cur.fetchall()
+
+            for ekipa in ekipe:
+                f_ekipa_id = ekipa[0]
+                self.cur.execute("""
+                    UPDATE fantasy_ekipa
+                    SET tocke = tocke + %s
+                    WHERE f_ekipa_id = %s
+                    """, (tocke_igr, f_ekipa_id))
+        # Commit spremembe
+        self.conn.commit() 
+        return "Tekma je bila uspešno odigrana."
+    
+    

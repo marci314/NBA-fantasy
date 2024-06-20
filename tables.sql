@@ -35,7 +35,6 @@ CREATE TABLE fantasy_ekipa (
 CREATE Table igralec (
     igralec_id TEXT PRIMARY KEY,
     ime TEXT NOT NULL,
-    priimek TEXT NOT NULL,
     pozicija TEXT,
     visina INT NOT NULL,
     rojstvo DATE
@@ -44,7 +43,6 @@ CREATE Table igralec (
 CREATE Table trener (
     trener_id TEXT PRIMARY KEY,
     ime TEXT NOT NULL,
-    priimek TEXT NOT NULL,
     rojstvo DATE
 );
 
@@ -66,10 +64,9 @@ CREATE TABLE tekma (
 );
 
 CREATE TABLE podatki_o_tekmi (
-    id_igralca TEXT,
-    id_tekme SERIAL,
-    id_trenerja TEXT,
-    id_ekipa INT,
+    FOREIGN KEY (id_igralca) REFERENCES igralec(igralec_id),
+    FOREIGN KEY (id_tekme) REFERENCES tekma(id_tekma),
+    FOREIGN KEY (id_ekipa) REFERENCES ekipa(ekipa_id),
     odstotek_meta FLOAT, 
     ukradene INT,
     bloki INT,
@@ -79,10 +76,6 @@ CREATE TABLE podatki_o_tekmi (
     odigrane_minute INT,
     tocke INT,
     izid BOOLEAN,
-    FOREIGN KEY (id_igralca) REFERENCES igralec(igralec_id),
-    FOREIGN KEY (id_tekme) REFERENCES tekma(id_tekma),
-    FOREIGN KEY (id_trenerja) REFERENCES trener(trener_id),
-    FOREIGN KEY (id_ekipa) REFERENCES ekipa(ekipa_id)
 );
 
 #rabva eno tabelo k bo povezovala igralcev id in od ekipe id...
@@ -90,4 +83,10 @@ CREATE TABLE fantasy_ekipa_igralci (
     f_ekipa_id INT REFERENCES fantasy_ekipa(f_ekipa_id),
     igralec_id INT REFERENCES igralec(igralec_id),
     PRIMARY KEY (f_ekipa_id, igralec_id)
+);
+
+CREATE TABLE igralci_tocke (
+    id_igralca INT NOT NULL REFERENCES igralec(igralec_id)
+    id_tekme INT NOT NULL REFERENCES tekma(id_tekma)
+    tocke INT
 );
