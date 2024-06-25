@@ -41,13 +41,13 @@
             margin: 10px 0;
             border: none;
             border-radius: 5px;
-            background-color: #28a745;
+            background-color: #007bff;
             color: white;
             cursor: pointer;
             box-sizing: border-box;
         }
         .create-account-container button:hover {
-            background-color: #218838;
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -55,11 +55,12 @@
     <div class="create-account-container">
         <img src="/static/nba-logo.jpg" alt="NBA Logo">
         <h2>Ustvari Račun</h2>
-        <form action="/handle_form" method="post">
+        <form action="/registracija" method="post">
             <input type="text" name="username" placeholder="Uporabniško ime" required>
             <input type="password" name="password" placeholder="Geslo" required>
             <input type="text" name="teamname" placeholder="Ime ekipe" required>
             <button type="submit" name="action" value="register">Ustvari račun</button>
+            <button type="button" onclick="window.location.href='/'">Nazaj</button>
         </form>
     </div>
 </body>

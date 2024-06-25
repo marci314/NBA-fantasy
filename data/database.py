@@ -22,20 +22,42 @@ class Repo:
         Doda novega uporabnika v tabelo 'uporabnik'.
         """
         self.cur.execute("""
-            INSERT INTO uporabnik (uporabnisko_ime, password_hash, last_login)
+            INSERT INTO uporabnik (uporabnisko_ime, geslo, last_login)
             VALUES (%s, %s, %s)
-            """, (uporabnik.uporabnisko_ime, uporabnik.password_hash, uporabnik.last_login))
+            """, (uporabnik.uporabnisko_ime, uporabnik.geslo, uporabnik.last_login))
         self.conn.commit()
 
-    def klice_uporabnika(self, username:str) -> Uporabnik:
+    def prijavi_uporabnika(self, uporabnisko_ime: str, geslo: str) -> UporabnikDTO:
+        uporabnik = self.repo.klice_uporabnika(uporabnisko_ime)
+        if uporabnik is None:
+            return None
+
+        geslo_bytes = geslo.encode('utf-8')
+        if self.preveri_geslo(uporabnik.geslo, geslo_bytes):
+            self.repo.posodobi_uporabnika(uporabnik)
+            return UporabnikDTO(
+                uporabnik_id=uporabnik.uporabnik_id,
+                uporabnisko_ime=uporabnik.uporabnisko_ime
+            )
+        else:
+            return None
+
+    def klice_uporabnika(self, username: str) -> Uporabnik:
         self.cur.execute("""
-            SELECT username, password_hash, last_login
+            SELECT uporabnik_id, uporabnisko_ime, geslo, last_login
             FROM uporabnik
-            WHERE username = %s
+            WHERE uporabnisko_ime = %s
         """, (username,))
-         
-        user = Uporabnik.from_dict(self.cur.fetchone())
-        return user
+        user_data = self.cur.fetchone()
+        if user_data:
+            return Uporabnik(
+                uporabnik_id=user_data['uporabnik_id'],
+                uporabnisko_ime=user_data['uporabnisko_ime'],
+                geslo=user_data['geslo'],
+                last_login=user_data['last_login']
+            )
+        else:
+            return None
     
     def posodobi_uporabnika(self, uporabnik: Uporabnik):
         self.cur.execute("""

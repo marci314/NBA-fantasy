@@ -53,14 +53,14 @@
 </head>
 <body>
     <div class="login-container">
-        <img src="C:\Users\Uporabnik\Desktop\NBA-fantasy-app\nba-logo.jpg" alt="NBA Logo">
+        <img src="/static/nba-logo.jpg" alt="NBA Logo">
         <h2>Prijava</h2>
-        <form action="/handle_form" method="post">
+        <form action="/prijava" method="post">
             <input type="text" name="username" placeholder="Uporabniško ime" required>
             <input type="password" name="password" placeholder="Geslo" required>
             <div>
                 <button type="submit" name="action" value="login">Prijava</button>
-                <button type="submit" name="action" value="register">Registracija</button>
+                <button type="button" onclick="window.location.href='/'">Nazaj</button>
             </div>
         </form>
     </div>

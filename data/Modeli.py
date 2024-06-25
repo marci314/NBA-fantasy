@@ -10,13 +10,14 @@ class Uporabnik:
     uporabnik_id: int = field(default=0)
     uporabnisko_ime: str = field(default="")
     geslo: str = field(default="")
+    last_login: date = field(default=None)
 
 @dataclass_json
 @dataclass
 class UporabnikDTO:
     uporabnik_id: int = field(default=0)
     uporabnisko_ime: str = field(default="")
-    
+    last_login: date = field(default=None)
 
 @dataclass_json
 @dataclass

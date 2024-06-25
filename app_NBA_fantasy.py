@@ -1,4 +1,5 @@
 from Presentation.bottleext import *
+from bottle import Bottle, get, post, request, response, template, redirect, static_file, run, TEMPLATE_PATH
 import psycopg2, psycopg2.extras
 import os
 from functools import wraps
@@ -30,54 +31,63 @@ def password_hash(s):
     return h.hexdigest()
 
 def cookie_required(f):
-    """
-    Dekorator, ki zahteva veljaven piškotek. Če piškotka ni, uporabnika preusmeri na stran za prijavo.
-    """
     @wraps(f)
-    def decorated( *args, **kwargs):
-        cookie = request.get_cookie("uporabnik")
-        if cookie:
+    def decorated(*args, **kwargs):
+        uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+        if uporabnisko_ime:
             return f(*args, **kwargs)
-        return template('prijava.html', uporabnik=None, napaka="Potrebna je prijava!")
+        return redirect('/prijava')
     return decorated
-
 @app.get('/')
 def domaca_stran():
     return template('domaca_stran.html')
 
-@route('/static/<filename:path>')
+
+@app.get('/test')
+def test():
+    return template('registracija.html')
+
+@app.route('/static/<filename:path>')
 def static(filename):
     return static_file(filename, root='Presentation/static')
 
-@get('/prijava') 
+@app.get('/prijava') 
 def prijava_get():
     return template("prijava.html")
 
 # Prijavna stran POST
-@post('/prijava')
+@app.post('/prijava')
 def prijava_post():
-    uporabnisko_ime = request.forms.get('uporabnisko_ime')
-    geslo = request.forms.get('geslo')
+    uporabnisko_ime = request.forms.get('username')
+    geslo = request.forms.get('password')
+
+    print(f"Prijava poskus za uporabnika: {uporabnisko_ime}")
+
+    if not uporabnisko_ime or not geslo:
+        print("Uporabniško ime ali geslo manjkajo.")
+        return template('prijava.html', napaka="Prosim, vnesite uporabniško ime in geslo!")
 
     user = auth_service.prijavi_uporabnika(uporabnisko_ime, geslo)
 
-    if isinstance(user, UporabnikDTO):
-        response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
-        return redirect('/homescreen')
-    else:
+    if user is None:
+        print("Nepravilno uporabniško ime ali geslo.")
         return template('prijava.html', napaka="Nepravilno uporabniško ime ali geslo!")
+
+    response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
+    print(f"Prijava uspešna, preusmeritev na homescreen za uporabnika: {uporabnisko_ime}")
+    return redirect('/homescreen')
 # Odjava
-@get('/odjava')
+@app.get('/odjava')
 def odjava():
     response.delete_cookie("uporabnisko_ime")
     return redirect('/')
 
-@get('/registracija')
+@app.get('/registracija')
 def registracija_get():
     return template('registracija.html')
 
 # Registracijska stran POST
-@post('/registracija')
+@app.post('/registracija')
 def registracija_post():
     uporabnisko_ime = request.forms.get('username')
     geslo = request.forms.get('password')
@@ -102,17 +112,17 @@ def dodaj_ekipo_ob_registraciji(user_id, teamname):
 @app.get('/homescreen')
 @cookie_required
 def domov():
-    user_id = request.get_cookie("user_id", secret='tvoja_tajna_kljuc')
-    if not user_id:
-        return redirect('/domaca_stran')
-    
+    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+    print(f"Uporabnik {uporabnisko_ime} dostopa do homescreen.")
+    user = auth_service.klice_uporabnika(uporabnisko_ime)
+
     cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.priimek, igralec.pozicija, igralec.visina, igralec.datum_rojstva
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.datum_rojstva
         FROM igralec
         JOIN fantasy_ekipa_igralci ON igralec.igralec_id = fantasy_ekipa_igralci.igralec_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_igralci.f_ekipa_id
         WHERE fantasy_ekipa.lastnik = %s
-    """, (user_id,))
+    """, (user.uporabnik_id,))
     players = cur.fetchall()
 
     cur.execute("""
@@ -121,18 +131,16 @@ def domov():
         JOIN fantasy_ekipa_trener ON trener.trener_id = fantasy_ekipa_trener.trener_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_trener.f_ekipa_id
         WHERE fantasy_ekipa.lastnik = %s
-    """, (user_id,))
+    """, (user.uporabnik_id,))
     coach = cur.fetchone()
 
     return template('homescreen.html', players=players, coach=coach)
-
-
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)
 
 
-@route('/izberi_datum', method=['GET', 'POST'])
+@app.route('/izberi_datum', method=['GET', 'POST'])
 def izberi_datum():
     if request.method == 'POST':
         izbrani_datum = request.forms.get('datum')
@@ -146,7 +154,7 @@ def izberi_datum():
     return template('izberi_datum_form')
 
 # HTML predloga za obrazec za izbiro datuma
-@route('/izberi_datum_form')
+@app.route('/izberi_datum_form')
 def izberi_datum_form():
     return '''
         <form action="/izberi_datum" method="post">

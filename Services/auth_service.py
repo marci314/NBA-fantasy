@@ -1,5 +1,5 @@
 from Data.database import Repo
-from Data.Modeli import *
+from Data.Modeli import Uporabnik, UporabnikDTO
 from typing import Union
 import bcrypt
 from datetime import date
@@ -14,37 +14,30 @@ class AuthService:
         Preveri, če obstaja uporabnik
         '''
         try:
-            user = self.repo.dobi_uporabnika(uporabnik)
+            user = self.repo.klice_uporabnika(uporabnik)
             return True
         except:
             return False
         
-    def prijavi_uporabnika(self, uporabnik: str, geslo: str) -> Union[UporabnikDTO, bool]:
-        """
-        Prijavi uporabnika z preverjanjem gesla in posodobi čas zadnje prijave.
-        """
-        # Najprej dobimo uporabnika iz baze
-        user = self.repo.dobi_uporabnika(uporabnik)
-    
-        # Če uporabnik ne obstaja, vrni False
-        if not user:
-            return False
+    def prijavi_uporabnika(self, uporabnisko_ime: str, geslo: str) -> UporabnikDTO:
+        uporabnik = self.repo.klice_uporabnika(uporabnisko_ime)
+        if uporabnik is None:
+            return None
     
         geslo_bytes = geslo.encode('utf-8')
-    
-        # Preverimo hash iz gesla, ki ga je vnesel uporabnik
-        succ = bcrypt.checkpw(geslo_bytes, user.password_hash.encode('utf-8'))
-    
-        if succ:
-            # Posodobimo last login time
-            user.last_login = date.today().isoformat()
-            self.repo.posodobi_uporabnika(user)
-    
-            # Vrni DTO za uporabnika brez role
-            return UporabnikDTO(username=user.uporabnisko_ime)
-        
-        return False     
+        if self.preveri_geslo(uporabnik.geslo, geslo_bytes):
+            uporabnik.last_login = date.today().isoformat()  # Posodobi last_login
+            self.repo.posodobi_uporabnika(uporabnik)
+            return UporabnikDTO(
+                uporabnik_id=uporabnik.uporabnik_id,
+                uporabnisko_ime=uporabnik.uporabnisko_ime,
+                last_login=uporabnik.last_login
+            )
+        else:
+            return None
 
+    def preveri_geslo(self, hashed: str, geslo: bytes) -> bool:
+        return bcrypt.checkpw(geslo, hashed.encode('utf-8'))
 
     def dodaj_uporabnika(self, uporabnik: str, geslo: str) -> UporabnikDTO:
         """
@@ -59,7 +52,7 @@ class AuthService:
         u = Uporabnik(
             uporabnisko_ime=uporabnik,
             password_hash=password_hash.decode(),  # Dekodiramo hash gesla
-            last_login=date.today().isoformat()  # Nastavimo trenutni datum kot last_login
+            last_login=date.today()  # Nastavimo trenutni datum kot last_login
         )
     
         # Dodamo uporabnika v bazo
