@@ -70,6 +70,9 @@ class AuthService:
 
     def klice_uporabnika(self, username: str) -> Uporabnik:
         return self.repo.klice_uporabnika(username)
+    
+    
+
 
 
 

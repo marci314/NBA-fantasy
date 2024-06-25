@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
-    <title>Lestvica - NBA Fantasy League</title>
+    <title>Spreminjaj Trenerja - NBA Fantasy League</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,26 +63,39 @@
 </head>
 <body>
     <div class="container">
-        <h1>Lestvica</h1>
-        <table id="leaderboard-table">
+        <h1>Spreminjaj Trenerja</h1>
+        <table id="coach-table">
             <thead>
                 <tr>
-                    <th>ID Ekipe</th>
-                    <th>Ime Ekipe</th>
-                    <th>Točke</th>
+                    <th>Izberi</th>
+                    <th>ID Trenerja</th>
+                    <th>Ime</th>
+                    <th>Datum Rojstva</th>
                 </tr>
             </thead>
             <tbody>
-                % for team in teams:
+                % for coach in coaches:
                 <tr>
-                    <td>{{team[0]}}</td>
-                    <td>{{team[1]}}</td>
-                    <td>{{team[2]}}</td>
+                    <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
+                    <td>{{coach[0]}}</td>
+                    <td>{{coach[1]}}</td>
+                    <td>{{coach[2]}}</td>
                 </tr>
                 % end
             </tbody>
         </table>
+        <button id="add-coach">Dodaj trenerja</button>
         <button onclick="window.location.href='/domov'">Nazaj</button>
     </div>
+    <script>
+        document.getElementById('add-coach').onclick = function() {
+            let selectedCoach = document.querySelector('input[name="coach"]:checked');
+            if (selectedCoach) {
+                window.location.href = '/dodaj_trenerja/' + selectedCoach.value;
+            } else {
+                alert('Prosim izberi trenerja.');
+            }
+        };
+    </script>
 </body>
 </html>

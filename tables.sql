@@ -78,7 +78,7 @@ CREATE TABLE podatki_o_tekmi (
     izid BOOLEAN,
 );
 
-#rabva eno tabelo k bo povezovala igralcev id in od ekipe id...
+
 CREATE TABLE fantasy_ekipa_igralci (
     f_ekipa_id INT REFERENCES fantasy_ekipa(f_ekipa_id),
     igralec_id INT REFERENCES igralec(igralec_id),

@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
-    <title>Lestvica - NBA Fantasy League</title>
+    <title>Spreminjaj Igralce - NBA Fantasy League</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,26 +63,43 @@
 </head>
 <body>
     <div class="container">
-        <h1>Lestvica</h1>
-        <table id="leaderboard-table">
+        <h1>Spreminjaj Igralce</h1>
+        <table id="player-table">
             <thead>
                 <tr>
-                    <th>ID Ekipe</th>
-                    <th>Ime Ekipe</th>
-                    <th>Točke</th>
+                    <th>Izberi</th>
+                    <th>ID Igralca</th>
+                    <th>Ime</th>
+                    <th>Pozicija</th>
+                    <th>Višina (cm)</th>
+                    <th>Datum Rojstva</th>
                 </tr>
             </thead>
             <tbody>
-                % for team in teams:
+                % for player in players:
                 <tr>
-                    <td>{{team[0]}}</td>
-                    <td>{{team[1]}}</td>
-                    <td>{{team[2]}}</td>
+                    <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
+                    <td>{{player[0]}}</td>
+                    <td>{{player[1]}}</td>
+                    <td>{{player[2]}}</td>
+                    <td>{{player[3]}}</td>
+                    <td>{{player[4]}}</td>
                 </tr>
                 % end
             </tbody>
         </table>
+        <button id="add-player">Dodaj igralca</button>
         <button onclick="window.location.href='/domov'">Nazaj</button>
     </div>
+    <script>
+        document.getElementById('add-player').onclick = function() {
+            let selectedPlayer = document.querySelector('input[name="player"]:checked');
+            if (selectedPlayer) {
+                window.location.href = '/dodaj_igralca/' + selectedPlayer.value;
+            } else {
+                alert('Prosim izberi igralca.');
+            }
+        };
+    </script>
 </body>
 </html>

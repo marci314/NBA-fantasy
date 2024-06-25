@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
-    <title>Lestvica - NBA Fantasy League</title>
+    <title>Spored Tekem - NBA Fantasy League</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
             align-items: center;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 0 auto.
         }
 
         h1 {
@@ -43,7 +43,7 @@
         th, td {
             padding: 10px;
             border: 1px solid #ddd;
-            text-align: center;
+            text-align: center.
         }
 
         button {
@@ -53,31 +53,33 @@
             color: #fff;
             border-radius: 4px;
             cursor: pointer;
-            margin: 10px;
+            margin: 10px.
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #0056b3.
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Lestvica</h1>
-        <table id="leaderboard-table">
+        <h1>Spored Tekem</h1>
+        <table id="schedule-table">
             <thead>
                 <tr>
-                    <th>ID Ekipe</th>
-                    <th>Ime Ekipe</th>
-                    <th>Točke</th>
+                    <th>ID Tekme</th>
+                    <th>Domača Ekipa</th>
+                    <th>Gostujoča Ekipa</th>
+                    <th>Datum</th>
                 </tr>
             </thead>
             <tbody>
-                % for team in teams:
+                % for match in matches:
                 <tr>
-                    <td>{{team[0]}}</td>
-                    <td>{{team[1]}}</td>
-                    <td>{{team[2]}}</td>
+                    <td>{{match[0]}}</td>
+                    <td>{{match[1]}}</td>
+                    <td>{{match[2]}}</td>
+                    <td>{{match[3]}}</td>
                 </tr>
                 % end
             </tbody>
