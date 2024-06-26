@@ -17,62 +17,6 @@ class Repo:
         self.conn = psycopg2.connect(database=auth.dbname, host=auth.host, user=auth.user, password=auth.password, port=DB_PORT)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    def dodaj_uporabnika(self, uporabnik: Uporabnik):
-        """
-        Doda novega uporabnika v tabelo 'uporabnik'.
-        """
-        self.cur.execute("""
-            INSERT INTO uporabnik (uporabnisko_ime, geslo, last_login)
-            VALUES (%s, %s, %s)
-            """, (uporabnik.uporabnisko_ime, uporabnik.geslo, uporabnik.last_login))
-        self.conn.commit()
-
-    def prijavi_uporabnika(self, uporabnisko_ime: str, geslo: str) -> UporabnikDTO:
-        uporabnik = self.repo.klice_uporabnika(uporabnisko_ime)
-        if uporabnik is None:
-            return None
-
-        geslo_bytes = geslo.encode('utf-8')
-        if self.preveri_geslo(uporabnik.geslo, geslo_bytes):
-            self.repo.posodobi_uporabnika(uporabnik)
-            return UporabnikDTO(
-                uporabnik_id=uporabnik.uporabnik_id,
-                uporabnisko_ime=uporabnik.uporabnisko_ime
-            )
-        else:
-            return None
-
-    def klice_uporabnika(self, username: str) -> Uporabnik:
-        self.cur.execute("""
-            SELECT uporabnik_id, uporabnisko_ime, geslo, last_login
-            FROM uporabnik
-            WHERE uporabnisko_ime = %s
-        """, (username,))
-        user_data = self.cur.fetchone()
-        if user_data:
-            return Uporabnik(
-                uporabnik_id=user_data['uporabnik_id'],
-                uporabnisko_ime=user_data['uporabnisko_ime'],
-                geslo=user_data['geslo'],
-                last_login=user_data['last_login']
-            )
-        else:
-            return None
-    
-    def posodobi_uporabnika(self, uporabnik: Uporabnik):
-        self.cur.execute("""
-            Update uporabnik set last_login = %s where username = %s
-            """, (uporabnik.last_login,uporabnik.username))
-        self.conn.commit()
-    
-
-    def tabela_uporabnik(self) -> List[Uporabnik]:
-        self.cur.execute("""
-            SELECT * FROM uporabnik
-        """)
-        return [Uporabnik(uporabnik_id, uporabnisko_ime, geslo) for (uporabnik_id, uporabnisko_ime, geslo) in self.cur.fetchall()]
-
-
     def dodaj_igralca_v_fantasy_ekipo(self, f_ekipa_id: int, igralec_id: str) -> None:
          # Preveri, ali ima ekipa že 5 igralcev
         self.cur.execute("""
@@ -110,7 +54,6 @@ class Repo:
         self.conn.commit()
         print(f"Igralec {igralec_id} je bil odstranjen iz ekipe {f_ekipa_id}.")
 
-# 
     def dodaj_trenerja_v_fantasy_ekipo(self, f_ekipa_id: int, trener_id: str) -> None:
          # Preveri, ali ima ekipa že 5 igralcev
         self.cur.execute("""
@@ -220,9 +163,6 @@ class Repo:
         }
 
         return result
-
-    
-
 
     def odigraj_teden(self, izbrani_datum: datetime.date) -> str:
         '''Izvede tekme za naslednji teden in prišteje točke ekipam.'''
@@ -359,5 +299,3 @@ class Repo:
         # Commit spremembe
         self.conn.commit() 
         return "Tekma je bila uspešno odigrana."
-    
-    

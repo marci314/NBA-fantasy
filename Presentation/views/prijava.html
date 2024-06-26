@@ -20,20 +20,20 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 320px; /* Povečali smo širino za boljše prileganje */
-            box-sizing: border-box; /* Upošteva padding in border pri nastavitvi širine */
+            width: 320px;
+            box-sizing: border-box;
         }
         .login-container img {
             width: 100px;
             margin-bottom: 20px;
         }
         .login-container input {
-            width: calc(100% - 22px); /* Upošteva padding in border */
+            width: calc(100% - 22px);
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box; /* Upošteva padding in border pri nastavitvi širine */
+            box-sizing: border-box;
         }
         .login-container button {
             width: 48%;
@@ -44,10 +44,14 @@
             background-color: #007BFF;
             color: white;
             cursor: pointer;
-            box-sizing: border-box; /* Upošteva padding in border pri nastavitvi širine */
+            box-sizing: border-box;
         }
         .login-container button:hover {
             background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -63,6 +67,9 @@
                 <button type="button" onclick="window.location.href='/'">Nazaj</button>
             </div>
         </form>
+        % if napaka:
+            <p class="error-message">{{napaka}}</p>
+        % end
     </div>
 </body>
 </html>

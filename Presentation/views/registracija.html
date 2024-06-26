@@ -36,18 +36,22 @@
             box-sizing: border-box;
         }
         .create-account-container button {
-            width: 100%;
+            width: calc(48% - 10px);
             padding: 10px;
-            margin: 10px 0;
+            margin: 10px 5px;
             border: none;
             border-radius: 5px;
-            background-color: #007bff;
+            background-color: #007BFF;
             color: white;
             cursor: pointer;
             box-sizing: border-box;
         }
         .create-account-container button:hover {
             background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -59,9 +63,14 @@
             <input type="text" name="username" placeholder="Uporabniško ime" required>
             <input type="password" name="password" placeholder="Geslo" required>
             <input type="text" name="teamname" placeholder="Ime ekipe" required>
-            <button type="submit" name="action" value="register">Ustvari račun</button>
-            <button type="button" onclick="window.location.href='/'">Nazaj</button>
+            <div>
+                <button type="submit">Ustvari račun</button>
+                <button type="button" onclick="window.location.href='/'">Nazaj</button>
+            </div>
         </form>
+        % if napaka:
+            <p class="error-message">{{napaka}}</p>
+        % end
     </div>
 </body>
 </html>

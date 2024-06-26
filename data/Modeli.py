@@ -17,7 +17,7 @@ class Uporabnik:
 class UporabnikDTO:
     uporabnik_id: int = field(default=0)
     uporabnisko_ime: str = field(default="")
-    last_login: date = field(default=None)
+    last_login: Optional[date] = field(default=None)
 
 @dataclass_json
 @dataclass

@@ -1,5 +1,4 @@
 from Presentation.bottleext import *
-from bottle import Bottle, get, post, request, response, template, redirect, static_file, run, TEMPLATE_PATH
 import psycopg2, psycopg2.extras
 import os
 from functools import wraps
@@ -9,7 +8,6 @@ from Data.auth_public import host, dbname, user, password
 import hashlib
 
 TEMPLATE_PATH.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'Presentation/views')))
-
 
 # Inicializacija aplikacije in povezave z bazo
 app = Bottle()
@@ -36,78 +34,74 @@ def cookie_required(f):
         uporabnisko_ime = request.get_cookie("uporabnisko_ime")
         if uporabnisko_ime:
             return f(*args, **kwargs)
-        return redirect('/prijava')
+        return template("domaca_stran.html")
     return decorated
+
 @app.get('/')
 def domaca_stran():
     return template('domaca_stran.html')
-
-
-@app.get('/test')
-def test():
-    return template('registracija.html')
 
 @app.route('/static/<filename:path>')
 def static(filename):
     return static_file(filename, root='Presentation/static')
 
-@app.get('/prijava') 
+@app.get('/prijava')
 def prijava_get():
-    return template("prijava.html")
+    return template("prijava.html", napaka="")
 
 # Prijavna stran POST
 @app.post('/prijava')
 def prijava_post():
     uporabnisko_ime = request.forms.get('username')
     geslo = request.forms.get('password')
-
-    print(f"Prijava poskus za uporabnika: {uporabnisko_ime}")
-
+    
     if not uporabnisko_ime or not geslo:
-        print("Uporabniško ime ali geslo manjkajo.")
-        return template('prijava.html', napaka="Prosim, vnesite uporabniško ime in geslo!")
-
+        return template("prijava.html", napaka="Uporabniško ime in geslo sta obvezna.")
+    
     user = auth_service.prijavi_uporabnika(uporabnisko_ime, geslo)
 
-    if user is None:
-        print("Nepravilno uporabniško ime ali geslo.")
-        return template('prijava.html', napaka="Nepravilno uporabniško ime ali geslo!")
+    if user == None:
+        return template('prijava.html', napaka="Nepravilno uporabniško ime ali geslo.")
 
     response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
-    print(f"Prijava uspešna, preusmeritev na homescreen za uporabnika: {uporabnisko_ime}")
     return redirect('/homescreen')
+
 # Odjava
 @app.get('/odjava')
 def odjava():
     response.delete_cookie("uporabnisko_ime")
-    return redirect('/')
+    return template("domaca_stran.html")
 
 @app.get('/registracija')
 def registracija_get():
-    return template('registracija.html')
+    return template('registracija.html', napaka="")
 
-# Registracijska stran POST
 @app.post('/registracija')
 def registracija_post():
     uporabnisko_ime = request.forms.get('username')
     geslo = request.forms.get('password')
     teamname = request.forms.get('teamname')
 
-    if auth_service.ali_obstaja_uporabnik(uporabnisko_ime):
-        return template('registracija.html', napaka="Uporabniško ime že obstaja.")
-    
     try:
-        auth_service.dodaj_uporabnika(uporabnisko_ime, geslo)
-        user_id = cur.fetchone()[0]
-        dodaj_ekipo_ob_registraciji(user_id, teamname)
+        if auth_service.ali_obstaja_uporabnik(uporabnisko_ime):
+            return template('registracija.html', napaka="Uporabniško ime že obstaja.")
+        
+        user_dto = auth_service.dodaj_uporabnika(uporabnisko_ime, geslo)
+        dodaj_ekipo_ob_registraciji(user_dto.uporabnik_id, teamname)
         return redirect('/prijava')
     except Exception as e:
-        return template('registracija.html', napaka=f"Napaka pri ustvarjanju računa: {str(e)}")
+        return template('prijava.html', napaka=f"Račun je ustvarjen, prijavite se!")
 
 def dodaj_ekipo_ob_registraciji(user_id, teamname):
+    auth_service.connect()
     tocke = 0
-    cur.execute("INSERT INTO fantasy_ekipa (tocke, lastnik, ime_ekipe) VALUES (%s, %s, %s)", (tocke, user_id, teamname))
-    conn.commit()
+    cur = auth_service.cur
+    try:
+        cur.execute("INSERT INTO fantasy_ekipa (tocke, lastnik, ime_ekipe) VALUES (%s, %s, %s)", (tocke, user_id, teamname))
+        auth_service.conn.commit()
+    except Exception as e:
+        auth_service.conn.rollback()
+        raise e
 
 @app.get('/homescreen')
 @cookie_required
@@ -116,8 +110,11 @@ def domov():
     print(f"Uporabnik {uporabnisko_ime} dostopa do homescreen.")
     user = auth_service.klice_uporabnika(uporabnisko_ime)
 
+    cur = auth_service.cur
+
+    # Preveri igralce
     cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.datum_rojstva
+        SELECT igralec.igralec_id, igralec.ime, igralec.priimek, igralec.pozicija, igralec.visina, igralec.rojstvo
         FROM igralec
         JOIN fantasy_ekipa_igralci ON igralec.igralec_id = fantasy_ekipa_igralci.igralec_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_igralci.f_ekipa_id
@@ -125,20 +122,52 @@ def domov():
     """, (user.uporabnik_id,))
     players = cur.fetchall()
 
+    # Preveri trenerja
     cur.execute("""
         SELECT trener.trener_id, trener.ime, trener.rojstvo
         FROM trener
-        JOIN fantasy_ekipa_trener ON trener.trener_id = fantasy_ekipa_trener.trener_id
+        LEFT JOIN fantasy_ekipa_trener ON trener.trener_id = fantasy_ekipa_trener.trener_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_trener.f_ekipa_id
         WHERE fantasy_ekipa.lastnik = %s
     """, (user.uporabnik_id,))
     coach = cur.fetchone()
 
+    # Preveri, ali so podatki prazni
+    if not players:
+        players = []
+    if not coach:
+        coach = None
+
     return template('homescreen.html', players=players, coach=coach)
+
+@app.get('/odstrani_igralca/<player_id>')
+@cookie_required
+def odstrani_igralca(player_id):
+    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+    user = auth_service.klice_uporabnika(uporabnisko_ime)
+    cur = auth_service.cur
+
+    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
+    f_ekipa_id = cur.fetchone()[0]
+
+    repo.odstrani_igralca_iz_fantasy_ekipe(f_ekipa_id, player_id)
+    return redirect('/homescreen')
+
+@app.get('/odstrani_trenerja/<coach_id>')
+@cookie_required
+def odstrani_trenerja(coach_id):
+    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+    user = auth_service.klice_uporabnika(uporabnisko_ime)
+    cur = auth_service.cur
+
+    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
+    f_ekipa_id = cur.fetchone()[0]
+
+    repo.odstrani_trenerja_iz_fantasy_ekipe(f_ekipa_id, coach_id)
+    return redirect('/homescreen')
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)
-
 
 @app.route('/izberi_datum', method=['GET', 'POST'])
 def izberi_datum():
