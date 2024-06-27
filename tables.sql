@@ -49,7 +49,7 @@ CREATE TABLE fantasy_ekipa (
 CREATE Table igralec (
     igralec_id SERIAL PRIMARY KEY,
     ime TEXT NOT NULL,
-    priimek, TEXT NOT NULL,
+    priimek TEXT NOT NULL,
     pozicija TEXT,
     visina INT NOT NULL,
     rojstvo DATE

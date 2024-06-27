@@ -34,9 +34,10 @@ def cookie_required(f):
         uporabnisko_ime = request.get_cookie("uporabnisko_ime")
         if uporabnisko_ime:
             return f(*args, **kwargs)
-        return template("domaca_stran.html")
+        return redirect('/prijava')
     return decorated
 
+#--------------------------DOMACA STRAN------------------------------------------------------------------------
 @app.get('/')
 def domaca_stran():
     return template('domaca_stran.html')
@@ -49,7 +50,6 @@ def static(filename):
 def prijava_get():
     return template("prijava.html", napaka="")
 
-# Prijavna stran POST
 @app.post('/prijava')
 def prijava_post():
     uporabnisko_ime = request.forms.get('username')
@@ -60,13 +60,13 @@ def prijava_post():
     
     user = auth_service.prijavi_uporabnika(uporabnisko_ime, geslo)
 
-    if user == None:
+    if user is None:
         return template('prijava.html', napaka="Nepravilno uporabniško ime ali geslo.")
 
     response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
     return redirect('/homescreen')
 
-@app.post('/odjava')
+@app.get('/odjava')
 def odjava():
     response.delete_cookie("uporabnisko_ime")
     return redirect('/')
@@ -131,7 +131,6 @@ def domov():
     """, (user.uporabnik_id,))
     coach = cur.fetchone()
 
-    # Preveri, ali so podatki prazni
     if not players:
         players = []
     if not coach:
@@ -170,7 +169,6 @@ def odstrani_trenerja(coach_id):
 def prikazi_lestvico():
     cur = auth_service.cur
 
-    # Pridobimo podatke o ekipah in njihovih točkah
     cur.execute("""
         SELECT f_ekipa_id, ime_ekipe, tocke
         FROM fantasy_ekipa
@@ -192,23 +190,11 @@ def izberi_datum():
         izbrani_datum = request.forms.get('datum')
         izbrani_datum = datetime.datetime.strptime(izbrani_datum, '%Y-%m-%d').date()
         
-        # Uporabi funkcijo odigraj_teden iz instance db
         rezultat = repo.odigraj_teden(izbrani_datum)
         
         return template('odigrane_tekme', rezultat=rezultat)
     
     return template('izberi_datum_form')
-
-# HTML predloga za obrazec za izbiro datuma
-@app.route('/izberi_datum_form')
-def izberi_datum_form():
-    return '''
-        <form action="/izberi_datum" method="post">
-            <label for="datum">Izberite datum:</label>
-            <input type="date" id="datum" name="datum" required>
-            <button type="submit">Izberi</button>
-        </form>
-    '''
 
 @app.get('/spreminjaj_igralce')
 def spreminjaj_igralce():
@@ -218,30 +204,16 @@ def spreminjaj_igralce():
 
 @app.get('/dodaj_igralca/<player_id>')
 def dodaj_igralca(player_id):
-    user_id = request.get_cookie("user_id", secret='tvoja_tajna_kljuc')
-    if not user_id:
+    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+    if not uporabnisko_ime:
         return redirect('/prijava')
     
-    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user_id,))
+    user = auth_service.klice_uporabnika(uporabnisko_ime)
+    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
     f_ekipa_id = cur.fetchone()[0]
     
-    rezultat = dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
-    return redirect('/domov')
-
-def dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, igralec_id):
-    cur.execute("SELECT COUNT(*) FROM fantasy_ekipa_igralci WHERE f_ekipa_id = %s", (f_ekipa_id,))
-    count = cur.fetchone()[0]
-    if count >= 5:
-        return "Ekipa ima že 5 igralcev."
-
-    cur.execute("SELECT * FROM fantasy_ekipa_igralci WHERE f_ekipa_id = %s AND igralec_id = %s", (f_ekipa_id, igralec_id))
-    row = cur.fetchone()
-    if row:
-        return "Igralec je že v ekipi."
-
-    cur.execute("INSERT INTO fantasy_ekipa_igralci (f_ekipa_id, igralec_id) VALUES (%s, %s)", (f_ekipa_id, igralec_id))
-    conn.commit()
-    return f"Igralec {igralec_id} je bil dodan v ekipo {f_ekipa_id}."
+    repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
+    return redirect('/homescreen')
 
 @app.get('/spreminjaj_trenerja')
 def spreminjaj_trenerja():
@@ -251,29 +223,16 @@ def spreminjaj_trenerja():
 
 @app.get('/dodaj_trenerja/<coach_id>')
 def dodaj_trenerja(coach_id):
-    user_id = request.get_cookie("user_id", secret='tvoja_tajna_kljuc')
-    if not user_id:
+    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+    if not uporabnisko_ime:
         return redirect('/prijava')
     
-    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user_id,))
+    user = auth_service.klice_uporabnika(uporabnisko_ime)
+    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
     f_ekipa_id = cur.fetchone()[0]
     
-    rezultat = dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
-    return redirect('/domov')
-
-def dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, trener_id):
-    cur.execute("SELECT COUNT(*) FROM fantasy_ekipa_trener WHERE f_ekipa_id = %s", (f_ekipa_id,))
-    count = cur.fetchone()[0]
-    if count >= 1:
-        return "Ekipa že ima izbranega trenerja."
-
-    cur.execute("INSERT INTO fantasy_ekipa_trener (f_ekipa_id, trener_id) VALUES (%s, %s)", (f_ekipa_id, trener_id))
-    conn.commit()
-    return f"Trener {trener_id} je bil dodan v ekipo {f_ekipa_id}."
-
-@app.get('/domaca_stran')
-def domaca_stran():
-    return template('domaca_stran.html')
+    repo.dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
+    return redirect('/homescreen')
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)
