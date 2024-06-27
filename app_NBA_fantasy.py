@@ -66,11 +66,10 @@ def prijava_post():
     response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
     return redirect('/homescreen')
 
-# Odjava
-@app.get('/odjava')
+@app.post('/odjava')
 def odjava():
     response.delete_cookie("uporabnisko_ime")
-    return template("domaca_stran.html")
+    return redirect('/')
 
 @app.get('/registracija')
 def registracija_get():
@@ -166,8 +165,26 @@ def odstrani_trenerja(coach_id):
     repo.odstrani_trenerja_iz_fantasy_ekipe(f_ekipa_id, coach_id)
     return redirect('/homescreen')
 
-if __name__ == '__main__':
-    run(app, host='localhost', port=8080, debug=True)
+@app.get('/lestvica')
+@cookie_required
+def prikazi_lestvico():
+    cur = auth_service.cur
+
+    # Pridobimo podatke o ekipah in njihovih točkah
+    cur.execute("""
+        SELECT f_ekipa_id, ime_ekipe, tocke
+        FROM fantasy_ekipa
+        ORDER BY tocke DESC
+    """)
+    teams = cur.fetchall()
+
+    return template('lestvica.html', teams=teams)
+
+@app.get('/spored_tekem')
+def spored_tekem():
+    cur.execute("SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum FROM tekma")
+    matches = cur.fetchall()
+    return template('spored_tekem.html', matches=matches)
 
 @app.route('/izberi_datum', method=['GET', 'POST'])
 def izberi_datum():
@@ -253,18 +270,6 @@ def dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, trener_id):
     cur.execute("INSERT INTO fantasy_ekipa_trener (f_ekipa_id, trener_id) VALUES (%s, %s)", (f_ekipa_id, trener_id))
     conn.commit()
     return f"Trener {trener_id} je bil dodan v ekipo {f_ekipa_id}."
-
-@app.get('/lestvica')
-def lestvica():
-    cur.execute("SELECT f_ekipa_id, ime_ekipe, tocke FROM fantasy_ekipa ORDER BY tocke DESC")
-    teams = cur.fetchall()
-    return template('lestvica.html', teams=teams)
-
-@app.get('/spored_tekem')
-def spored_tekem():
-    cur.execute("SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum FROM tekma")
-    matches = cur.fetchall()
-    return template('spored_tekem.html', matches=matches)
 
 @app.get('/domaca_stran')
 def domaca_stran():

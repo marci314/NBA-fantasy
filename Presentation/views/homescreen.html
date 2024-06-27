@@ -52,7 +52,7 @@
             box-shadow: -2px 0 5px rgba(0,0,0,0.1);
         }
 
-        .sidebar button {
+        .sidebar button, .sidebar form button {
             width: 100%;
             margin-bottom: 10px;
             padding: 10px;
@@ -61,9 +61,11 @@
             color: #fff;
             border-radius: 4px;
             cursor: pointer;
+            text-align: center;
+            box-sizing: border-box; /* Ensure buttons fill the width */
         }
 
-        .sidebar button:hover {
+        .sidebar button:hover, .sidebar form button:hover {
             background-color: #0056b3;
         }
 
@@ -105,7 +107,7 @@
             <h1>Moja Ekipa</h1>
         </header>
         <div class="sidebar">
-            <button onclick="window.location.href='/domaca_stran'">Odjava</button>
+            <button onclick="window.location.href='/odjava'">Odjava</button>
             <form action="/odigraj_teden" method="post">
                 <button type="submit">Odigraj teden</button>
             </form>
