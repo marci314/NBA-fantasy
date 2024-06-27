@@ -59,47 +59,55 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        .error {
+            color: red;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Dodaj Igralce</h1>
-        <table id="player-table">
-            <thead>
-                <tr>
-                    <th>Izberi</th>
-                    <th>ID Igralca</th>
-                    <th>Ime</th>
-                    <th>Pozicija</th>
-                    <th>Višina (cm)</th>
-                    <th>Datum Rojstva</th>
-                </tr>
-            </thead>
-            <tbody>
-                % for player in players:
-                <tr>
-                    <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
-                    <td>{{player[0]}}</td>
-                    <td>{{player[1]}}</td>
-                    <td>{{player[2]}}</td>
-                    <td>{{player[3]}}</td>
-                    <td>{{player[4]}}</td>
-                </tr>
-                % end
-            </tbody>
-        </table>
-        <button id="add-player">Dodaj igralca</button>
+        % if error:
+        <p class="error">{{error}}</p>
+        % end
+        <form action="/dodaj_igralca" method="post">
+            <table id="player-table">
+                <thead>
+                    <tr>
+                        <th>Izberi</th>
+                        <th>ID Igralca</th>
+                        <th>Ime</th>
+                        <th>Pozicija</th>
+                        <th>Višina (cm)</th>
+                        <th>Datum Rojstva</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % for player in players:
+                    <tr>
+                        <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
+                        <td>{{player[0]}}</td>
+                        <td>{{player[1]}}</td>
+                        <td>{{player[2]}}</td>
+                        <td>{{player[3]}}</td>
+                        <td>{{player[4]}}</td>
+                    </tr>
+                    % end
+                </tbody>
+            </table>
+            <div class="button-container">
+                <button type="submit">Dodaj igralca</button>
+            </div>
+        </form>
         <button onclick="window.location.href='/homescreen'">Nazaj</button>
     </div>
-    <script>
-        document.getElementById('add-player').onclick = function() {
-            let selectedPlayer = document.querySelector('input[name="player"]:checked');
-            if (selectedPlayer) {
-                window.location.href = '/dodaj_igralca/' + selectedPlayer.value;
-            } else {
-                alert('Prosim izberi igralca.');
-            }
-        };
-    </script>
 </body>
 </html>

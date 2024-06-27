@@ -6,6 +6,7 @@ from Services.auth_service import AuthService
 from Data.database import *
 from Data.auth_public import host, dbname, user, password
 import hashlib
+from typing import List, Dict, Union
 
 TEMPLATE_PATH.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'Presentation/views')))
 
@@ -198,28 +199,36 @@ def izberi_datum():
 
 @app.get('/spreminjaj_igralce')
 def spreminjaj_igralce():
-    cur.execute("SELECT * FROM igralec")
-    players = cur.fetchall()
-    return template('spreminjaj_igralce.html', players=players)
+    players = repo.get_all_players()
+    return template('spreminjaj_igralce.html', players=players, error=None)
 
-@app.get('/dodaj_igralca/<player_id>')
-def dodaj_igralca(player_id):
+@app.post('/dodaj_igralca')
+def dodaj_igralca():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
         return redirect('/prijava')
-    
+
+    player_id = request.forms.get('player')
+    if not player_id:
+        players = repo.get_all_players()
+        return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
+
     user = auth_service.klice_uporabnika(uporabnisko_ime)
-    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
-    f_ekipa_id = cur.fetchone()[0]
-    
-    repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
-    return redirect('/homescreen')
+    with auth_service.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+        cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
+        f_ekipa_id = cur.fetchone()[0]
+
+    rezultat = repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
+    players = repo.get_all_players()
+    if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
+        return template('spreminjaj_igralce.html', players=players, error=rezultat)
+    return redirect('/spreminjaj_igralce')
 
 @app.get('/spreminjaj_trenerja')
 def spreminjaj_trenerja():
     cur.execute("SELECT * FROM trener")
     coaches = cur.fetchall()
-    return template('spreminjaj_trenerja.html', coaches=coaches)
+    return template('spreminjaj_trenerja.html', coaches=coaches, error=None)
 
 @app.get('/dodaj_trenerja/<coach_id>')
 def dodaj_trenerja(coach_id):
@@ -231,8 +240,12 @@ def dodaj_trenerja(coach_id):
     cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
     f_ekipa_id = cur.fetchone()[0]
     
-    repo.dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
-    return redirect('/homescreen')
+    rezultat = repo.dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
+    cur.execute("SELECT * FROM trener")
+    coaches = cur.fetchall()
+    if "Ekipa že ima trenerja." in rezultat:
+        return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)
+    return redirect('/spreminjaj_trenerja')
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

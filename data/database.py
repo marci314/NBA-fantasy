@@ -6,6 +6,7 @@ from Data.Modeli import *
 from datetime import date
 import Data.auth_public as auth
 import math
+from typing import List, Dict
 
 # Preberemo port za bazo iz okoljskih spremenljivk
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
@@ -17,61 +18,58 @@ class Repo:
         self.conn = psycopg2.connect(database=auth.dbname, host=auth.host, user=auth.user, password=auth.password, port=DB_PORT)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    def dodaj_igralca_v_fantasy_ekipo(self, f_ekipa_id: int, igralec_id: str) -> None:
-         # Preveri, ali ima ekipa že 5 igralcev
-        self.cur.execute("""
-            SELECT COUNT(*) FROM fantasy_ekipa_igralci
-            WHERE f_ekipa_id = %s
+    def dodaj_igralca_v_fantasy_ekipo(self, f_ekipa_id: int, igralec_id: str) -> str:
+        with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            cur.execute("""
+                SELECT COUNT(*) FROM fantasy_ekipa_igralci
+                WHERE f_ekipa_id = %s
             """, (f_ekipa_id,))
-        count = self.cur.fetchone()[0]
-        if count >= 5:
-            return "Ekipa ima že 5 igralcev."
+            count = cur.fetchone()[0]
+            if count >= 5:
+                return "Ekipa ima že 5 igralcev."
 
-        # Preveri, ali igralec že obstaja v ekipi
-        self.cur.execute("""
-            SELECT * FROM fantasy_ekipa_igralci
-            WHERE f_ekipa_id = %s AND igralec_id = %s
+            cur.execute("""
+                SELECT * FROM fantasy_ekipa_igralci
+                WHERE f_ekipa_id = %s AND igralec_id = %s
             """, (f_ekipa_id, igralec_id))
-        row = self.cur.fetchone()
-        if row:
-            print("Igralec je že v ekipi.")
-            return
+            row = cur.fetchone()
+            if row:
+                return "Igralec je že v ekipi."
 
-        # Dodaj igralca v fantazijsko ekipo
-        self.cur.execute("""
-            INSERT INTO fantasy_ekipa_igralci (f_ekipa_id, igralec_id)
-            VALUES (%s, %s)
+            cur.execute("""
+                INSERT INTO fantasy_ekipa_igralci (f_ekipa_id, igralec_id)
+                VALUES (%s, %s)
             """, (f_ekipa_id, igralec_id))
-        self.conn.commit()
-        print(f"Igralec {igralec_id} je bil dodan v ekipo {f_ekipa_id}.")
+            self.conn.commit()
+            return "Igralec je bil uspešno dodan."
 
     def odstrani_igralca_iz_fantasy_ekipe(self, f_ekipa_id: int, igralec_id: str) -> None:
-        # Odstrani igralca iz fantazijske ekipe
-        self.cur.execute("""
-            DELETE FROM fantasy_ekipa_igralci
-            WHERE f_ekipa_id = %s AND igralec_id = %s
-            """, (f_ekipa_id, igralec_id))
-        self.conn.commit()
-        print(f"Igralec {igralec_id} je bil odstranjen iz ekipe {f_ekipa_id}.")
-
-    def dodaj_trenerja_v_fantasy_ekipo(self, f_ekipa_id: int, trener_id: str) -> None:
-         # Preveri, ali ima ekipa že 5 igralcev
-        self.cur.execute("""
-            SELECT COUNT(*) FROM fantasy_ekipa_trener
-            WHERE f_ekipa_id = %s
+        with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            # Odstrani igralca iz fantazijske ekipe
+            cur.execute("""
+                DELETE FROM fantasy_ekipa_igralci
+                WHERE f_ekipa_id = %s AND igralec_id = %s
+                """, (f_ekipa_id, igralec_id))
+            self.conn.commit()
+            print(f"Igralec {igralec_id} je bil odstranjen iz ekipe {f_ekipa_id}.")
+    
+    def dodaj_trenerja_v_fantasy_ekipo(self, f_ekipa_id: int, trener_id: str) -> str:
+        with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            cur.execute("""
+                SELECT COUNT(*) FROM fantasy_ekipa_trener
+                WHERE f_ekipa_id = %s
             """, (f_ekipa_id,))
-        count = self.cur.fetchone()[0]
-        if count >= 1:
-            return "Ekipa že ima izbranega trenerja."
+            count = cur.fetchone()[0]
+            if count >= 1:
+                return "Ekipa že ima trenerja."
 
-        # Dodaj trenerja v fantazijsko ekipo
-        self.cur.execute("""
-            INSERT INTO fantasy_ekipa_trener (f_ekipa_id, trener_id)
-            VALUES (%s, %s)
+            cur.execute("""
+                INSERT INTO fantasy_ekipa_trener (f_ekipa_id, trener_id)
+                VALUES (%s, %s)
             """, (f_ekipa_id, trener_id))
-        self.conn.commit()
-        print(f"Trener {trener_id} je bil dodan v ekipo {f_ekipa_id}.")
-
+            self.conn.commit()
+            return "Trener je bil uspešno dodan."
+    
     def odstrani_trenerja_iz_fantasy_ekipe(self, f_ekipa_id: int, trener_id: str) -> None:
         # Odstrani trenerja iz fantazijske ekipe
         self.cur.execute("""
@@ -81,6 +79,11 @@ class Repo:
         self.conn.commit()
         print(f"Trener {trener_id} je bil odstranjen iz ekipe {f_ekipa_id}.")
 
+    def get_all_players(self) -> List[Dict]:
+        with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            cur.execute("SELECT * FROM igralec")
+            return cur.fetchall()
+    
     def ustvari_fantasy_ekipo(self, fantasy_ekipa: FantasyEkipa) -> FantasyEkipa:
         # Preveri, da nima uporabnik več kot treh ekip
         self.cur.execute("""
