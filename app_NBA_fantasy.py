@@ -43,6 +43,7 @@ def cookie_required(f):
 def domaca_stran():
     return template('domaca_stran.html')
 
+
 @app.route('/static/<filename:path>')
 def static(filename):
     return static_file(filename, root='Presentation/static')
@@ -179,11 +180,6 @@ def prikazi_lestvico():
 
     return template('lestvica.html', teams=teams)
 
-@app.get('/spored_tekem')
-def spored_tekem():
-    cur.execute("SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum FROM tekma")
-    matches = cur.fetchall()
-    return template('spored_tekem.html', matches=matches)
 
 @app.route('/izberi_datum', method=['GET', 'POST'])
 def izberi_datum():
@@ -246,6 +242,97 @@ def dodaj_trenerja(coach_id):
     if "Ekipa že ima trenerja." in rezultat:
         return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)
     return redirect('/spreminjaj_trenerja')
+
+@app.get('/ekipa/<ekipa_id>')
+def prikazi_ekipo(ekipa_id):
+    cur = auth_service.cur
+
+    # Initialize error as None
+    error = None
+
+    # Pridobimo podatke o ekipi
+    cur.execute("""
+        SELECT ime_ekipe, tocke
+        FROM fantasy_ekipa
+        WHERE f_ekipa_id = %s
+    """, (ekipa_id,))
+    team = cur.fetchone()
+
+    if not team:
+        error = "Ekipa ne obstaja."
+        return template('ekipa.html', team=None, players=[], coach=None, error=error)
+
+    # Pridobimo igralce v ekipi
+    cur.execute("""
+        SELECT igralec.igralec_id, igralec.ime, igralec.priimek, igralec.pozicija, igralec.visina, igralec.rojstvo
+        FROM igralec
+        JOIN fantasy_ekipa_igralci ON igralec.igralec_id = fantasy_ekipa_igralci.igralec_id
+        WHERE fantasy_ekipa_igralci.f_ekipa_id = %s
+    """, (ekipa_id,))
+    players = cur.fetchall()
+
+    # Pridobimo trenerja v ekipi
+    cur.execute("""
+        SELECT trener.trener_id, trener.ime, trener.rojstvo
+        FROM trener
+        JOIN fantasy_ekipa_trener ON trener.trener_id = fantasy_ekipa_trener.trener_id
+        WHERE fantasy_ekipa_trener.f_ekipa_id = %s
+    """, (ekipa_id,))
+    coach = cur.fetchone()
+
+    return template('ekipa.html', team=team, players=players, coach=coach, error=error)
+
+@app.get('/spored_tekem')
+def spored_tekem():
+    cur.execute("SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum FROM tekma")
+    matches = cur.fetchall()
+    return template('spored_tekem.html', matches=matches)
+
+@app.get('/tekma/<id_tekma>')
+def prikazi_tekmo(id_tekma):
+    # Fetch home team players and coach
+    cur.execute("""
+        SELECT i.igralec_id, i.ime, i.priimek, i.pozicija, i.visina, i.rojstvo
+        FROM igralec i
+        JOIN fantasy_ekipa_igralci fei ON i.igralec_id = fei.igralec_id
+        JOIN tekma t ON fei.f_ekipa_id = t.domaca_ekipa::integer
+        WHERE t.id_tekma = %s
+    """, (id_tekma,))
+    domaci_igralci = cur.fetchall()
+
+    cur.execute("""
+        SELECT tr.trener_id, tr.ime, tr.rojstvo
+        FROM trener tr
+        JOIN fantasy_ekipa_trener fet ON tr.trener_id = fet.trener_id
+        JOIN tekma t ON fet.f_ekipa_id = t.domaca_ekipa::integer
+        WHERE t.id_tekma = %s
+    """, (id_tekma,))
+    domaci_trener = cur.fetchone()
+
+    # Fetch away team players and coach
+    cur.execute("""
+        SELECT i.igralec_id, i.ime, i.priimek, i.pozicija, i.visina, i.rojstvo
+        FROM igralec i
+        JOIN fantasy_ekipa_igralci fei ON i.igralec_id = fei.igralec_id
+        JOIN tekma t ON fei.f_ekipa_id = t.gostujoca_ekipa::integer
+        WHERE t.id_tekma = %s
+    """, (id_tekma,))
+    gostujoci_igralci = cur.fetchall()
+
+    cur.execute("""
+        SELECT tr.trener_id, tr.ime, tr.rojstvo
+        FROM trener tr
+        JOIN fantasy_ekipa_trener fet ON tr.trener_id = fet.trener_id
+        JOIN tekma t ON fet.f_ekipa_id = t.gostujoca_ekipa::integer
+        WHERE t.id_tekma = %s
+    """, (id_tekma,))
+    gostujoci_trener = cur.fetchone()
+
+    return template('tekma.html', 
+                    domaci_igralci=domaci_igralci, 
+                    domaci_trener=domaci_trener, 
+                    gostujoci_igralci=gostujoci_igralci, 
+                    gostujoci_trener=gostujoci_trener)
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

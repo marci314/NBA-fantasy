@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <title>Podrobnosti Tekme - NBA Fantasy League</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 25px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background-color: #f1f1f1;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Podatki o tekmi</h1>
+        
+        <h2>Domača Ekipa</h2>
+        <h3>Igralci</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Igralca</th>
+                    <th>Ime</th>
+                    <th>Priimek</th>
+                    <th>Pozicija</th>
+                    <th>Višina</th>
+                    <th>Rojstvo</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for player in domaci_igralci:
+                <tr>
+                    <td>{{player.igralec_id}}</td>
+                    <td>{{player.ime}}</td>
+                    <td>{{player.priimek}}</td>
+                    <td>{{player.pozicija}}</td>
+                    <td>{{player.visina}}</td>
+                    <td>{{player.rojstvo}}</td>
+                </tr>
+                % end
+            </tbody>
+        </table>
+        <h3>Trener</h3>
+        % if domaci_trener:
+        <p>{{domaci_trener.ime}} {{domaci_trener.rojstvo}}</p>
+        % else:
+        <p>Trener ni določen</p>
+        % end
+
+        <h2>Gostujoča Ekipa</h2>
+        <h3>Igralci</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Igralca</th>
+                    <th>Ime</th>
+                    <th>Priimek</th>
+                    <th>Pozicija</th>
+                    <th>Višina</th>
+                    <th>Rojstvo</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for player in gostujoci_igralci:
+                <tr>
+                    <td>{{player.igralec_id}}</td>
+                    <td>{{player.ime}}</td>
+                    <td>{{player.priimek}}</td>
+                    <td>{{player.pozicija}}</td>
+                    <td>{{player.visina}}</td>
+                    <td>{{player.rojstvo}}</td>
+                </tr>
+                % end
+            </tbody>
+        </table>
+        <h3>Trener</h3>
+        % if gostujoci_trener:
+        <p>{{gostujoci_trener.ime}} {{gostujoci_trener.rojstvo}}</p>
+        % else:
+        <p>Trener ni določen</p>
+        % end
+
+        <button onclick="window.location.href='/spored_tekem'">Nazaj</button>
+    </div>
+</body>
+</html>
