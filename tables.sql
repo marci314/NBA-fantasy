@@ -68,20 +68,22 @@ CREATE TABLE fantasy_ekipa_trener (
 );
 
 CREATE TABLE ekipa (
-    ekipa_id SERIAL PRIMARY KEY
+    ekipa_id TEXT PRIMARY KEY,
+    ekipa_ime TEXT
 );
 
 CREATE TABLE tekma (
     id_tekma SERIAL PRIMARY KEY,
     domaca_ekipa TEXT NOT NULL,
     gostujoca_ekipa TEXT NOT NULL,
+    domaca_ekipa_tocke INT,
+    gostujoca_ekipa_tocke INT,
     datum DATE
 );
 
 CREATE TABLE podatki_o_tekmi (
     id_igralca INT REFERENCES igralec(igralec_id),
     id_tekme INT REFERENCES tekma(id_tekma),
-    id_ekipa INT REFERENCES ekipa(ekipa_id),
     odstotek_meta FLOAT, 
     ukradene INT,
     bloki INT,
