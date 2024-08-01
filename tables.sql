@@ -1,16 +1,17 @@
+-- Active: 1715255540772@@baza.fmf.uni-lj.si@5432@sem2024_jostp@public
 -- Podelitev pravic
-GRANT ALL ON DATABASE sem2024_marcelb TO jostp WITH GRANT OPTION;
+GRANT ALL ON DATABASE sem2024_jostp TO marcelb WITH GRANT OPTION;
 GRANT ALL ON SCHEMA public TO jostp WITH GRANT OPTION;
-GRANT ALL ON DATABASE sem2024_marcelb TO gasperdr WITH GRANT OPTION;
+GRANT ALL ON DATABASE sem2024_jostp TO gasperdr WITH GRANT OPTION;
 GRANT ALL ON SCHEMA public TO gasperdr WITH GRANT OPTION;
-GRANT ALL ON DATABASE sem2024_marcelb TO majg WITH GRANT OPTION;
+GRANT ALL ON DATABASE sem2024_jostp TO majg WITH GRANT OPTION;
 GRANT ALL ON SCHEMA public TO majg WITH GRANT OPTION;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO gasperdr WITH GRANT OPTION;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO gasperdr WITH GRANT OPTION;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO majg WITH GRANT OPTION;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO majg WITH GRANT OPTION;
-GRANT CONNECT ON DATABASE sem2024_marcelb TO javnost;
-GRANT ALL PRIVILEGES ON DATABASE sem2024_marcelb TO javnost;
+GRANT CONNECT ON DATABASE sem2024_jostp TO javnost;
+GRANT ALL PRIVILEGES ON DATABASE sem2024_jostp TO javnost;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO javnost;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO javnost;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO javnost;
@@ -47,9 +48,8 @@ CREATE TABLE fantasy_ekipa (
 );
 
 CREATE Table igralec (
-    igralec_id SERIAL PRIMARY KEY,
+    igralec_id TEXT PRIMARY KEY,
     ime TEXT NOT NULL,
-    priimek TEXT NOT NULL,
     pozicija TEXT,
     visina INT NOT NULL,
     rojstvo DATE
@@ -82,7 +82,7 @@ CREATE TABLE tekma (
 );
 
 CREATE TABLE podatki_o_tekmi (
-    id_igralca INT REFERENCES igralec(igralec_id),
+    id_igralca TEXT REFERENCES igralec(igralec_id),
     id_tekme INT REFERENCES tekma(id_tekma),
     odstotek_meta FLOAT, 
     ukradene INT,
@@ -92,18 +92,18 @@ CREATE TABLE podatki_o_tekmi (
     podaje INT,
     odigrane_minute INT,
     tocke INT,
-    izid BOOLEAN,
+    izid INT,
     PRIMARY KEY (id_igralca, id_tekme)
 );
 
 CREATE TABLE fantasy_ekipa_igralci (
     f_ekipa_id INT REFERENCES fantasy_ekipa(f_ekipa_id),
-    igralec_id INT REFERENCES igralec(igralec_id),
+    igralec_id TEXT REFERENCES igralec(igralec_id),
     PRIMARY KEY (f_ekipa_id, igralec_id)
 );
 
 CREATE TABLE igralci_tocke (
-    id_igralca INT NOT NULL REFERENCES igralec(igralec_id),
+    id_igralca TEXT NOT NULL REFERENCES igralec(igralec_id),
     id_tekme INT NOT NULL REFERENCES tekma(id_tekma),
     tocke INT,
     PRIMARY KEY (id_igralca, id_tekme)
