@@ -42,7 +42,7 @@ CREATE TABLE uporabnik (
 
 CREATE TABLE fantasy_ekipa (
     f_ekipa_id SERIAL PRIMARY KEY,
-    tocke INT NOT NULL,
+    tocke INT DEFAULT 0,
     lastnik INT NOT NULL REFERENCES uporabnik(uporabnik_id),
     ime_ekipe TEXT NOT NULL
 );

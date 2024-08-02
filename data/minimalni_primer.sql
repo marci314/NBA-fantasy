@@ -1,3 +1,5 @@
+-- Sledeče je minimalni primer podatkov, vmes uporabljen za testiranje. Se ne pojavi v dejanski aplikaciji.
+
 INSERT INTO ekipa (ekipa_id, ime) VALUES
 (1, 'Minnesota TImberwolves'),
 (2, 'Denver Nuggets');

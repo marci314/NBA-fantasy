@@ -1,10 +1,16 @@
 requests
 pandas
-beautifulsoup4
 lxml
 bottle
 psycopg2-binary
+psycopg2
 dataclasses-json
 bcrypt
 datetime
 math
+typing
+warnings
+io
+basketball_reference_web_scraper
+timedelta
+hashlib
