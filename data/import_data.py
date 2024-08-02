@@ -1,12 +1,11 @@
-# Datoteka s pomočjo dveh različnih scraperjev pridobi potrebne ppodatke za aplikacijo. Izbran je tritedenski časovni interval po zadnjem prestopnem roku.
-import numpy as np
+# Sledeča koda pridobi in uredi podatke, da so pripravljeni za INSERT v SQL. In sicer podatke o ekipah in igralcih.
+
 from datetime import datetime
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 from io import StringIO
-from sqlalchemy import create_engine
-from basketball_reference_scraper.players import get_game_logs
+from basketball_reference_scraper.teams import get_roster
 from basketball_reference_web_scraper import client
 from basketball_reference_web_scraper.data import OutputType
 
@@ -626,89 +625,23 @@ for line in EKIPE.split('\n'):
     team, abbrev = line.split(' : ')
     slovar_ekip[team.strip()] = abbrev.strip()
 
-
-# Za prvotni, minimalni primer podatkov.
-def uvozi_iz_csv(dat):
-    #df = pd.read_csv(dat)
-    df = np.loadtxt(dat,
-                 delimiter=",", dtype='str')
-    return df
-
-def ohrani_relevantno(df):
-    #df1 = df[:, 'Starters', 'MP', 'FG%', 'TRB', 'AST', 'STL', 'BLK', 'TOV', 'PTS', '-9999']
-    df1 = df[1:, [1, 4, 13, 14, 15, 16, 17, 19, 21]]
-    return df1
-
-def pretvori_v_sql(dat, id_tekme=0, id_ekipa=0, izid=0):
-    '''Vrne podatke o tekmah, pripravljene za INSERT v SQL.'''
-    df = np.loadtxt(dat,
-            delimiter=",", dtype='str')
-    df = df[1:, [1, 4, 13, 14, 15, 16, 17, 19, 21]]
-    for i in range(1, len(df[0])):
-        str = df[i, 0]
-        interval = f"{str[0:2]} minutes {str[3:]} seconds"
-        print(f"('{df[i, -1]}', {id_tekme}, {id_ekipa}, {df[i, 1]}, {df[i, 4]}, {df[i, 5]}, {df[i, 6]}, {df[i, 2]}, {df[i, 3]}, INTERVAL '{interval}', {df[i, 7]}, {izid}),")
-
-
-
-def transform_date_to_postgresql_format(date_str):
-    # Parse the date string into a datetime object
-    date_obj = datetime.strptime(date_str, '%B %d %Y')
-    # Format the datetime object into the desired PostgreSQL date format
-    postgres_date_str = date_obj.strftime('%Y-%m-%d')
-    return postgres_date_str
-
-def height_to_cm(height_str):
-    # Split the height string into feet and inches
-    feet, inches = map(int, height_str.split('-'))
-    
-    # Convert feet to inches and add the remaining inches
-    total_inches = feet * 12 + inches
-    
-    # Convert inches to centimeters (1 inch = 2.54 cm)
-    cm = total_inches * 2.54
-    
-    return round(cm)
-
-def igralci_v_sql(data):
-    '''Vrne podatke o igralcih, pripravljene za INSERT v SQL.'''
-    df = np.loadtxt(data,
-        delimiter=",", dtype='str')
-    ime = df[:, 1]
-    poz = df[:, 2]
-    visina = df[:, 3]
-    rojstvo = df[:, 5]
-    for i in range(1, len(df[0])):
-        visinacm = height_to_cm(str(visina[i]))
-        rojstvo1 = transform_date_to_postgresql_format(rojstvo[i])
-        print(f"(, '{ime[i]}', '{poz[i]}', {visinacm}, {rojstvo1})")
-    return
-
-
-
-def igralci_v_sql2(multistr):
-    '''Vrne podatke o igralcih, pripravljene za INSERT v SQL.'''
-    # Use StringIO to treat the multiline string as a file object
-    data = StringIO(multistr)
-    df = pd.read_csv(data, delimiter=',', dtype=str)
-    ime = df.iloc[:, 1].values
-    poz = df.iloc[:, 2].values
-    visina = df.iloc[:, 3].values
-    rojstvo = df.iloc[:, 5].values
-    for i in range(len(df)):
-        visinacm = height_to_cm(str(visina[i]))
-        rojstvo1 = transform_date_to_postgresql_format(rojstvo[i])
-        print(f"(, '{ime[i]}', '{poz[i]}', {visinacm}, {rojstvo1}),")
-    return
-
 # Funckije, ki vsakmeu igralcu dodajo pripadajoči nametag, torej primary key.
 igralci = pd.read_csv(StringIO(IGRALCI), delimiter=',', dtype=str)
-
 first_column = igralci.iloc[:, 1]
 last_column = igralci.iloc[:, -1]
 novo_igralci = pd.concat([first_column, last_column], axis=1)
 
+# Pomožne funckije.
+def transform_date_to_postgresql_format(date_str):
+    date_obj = datetime.strptime(date_str, '%B %d %Y')
+    postgres_date_str = date_obj.strftime('%Y-%m-%d')
+    return postgres_date_str
 
+def height_to_cm(height_str):
+    feet, inches = map(int, height_str.split('-'))
+    total_inches = feet * 12 + inches
+    cm = total_inches * 2.54
+    return round(cm)
 
 def dataframe_to_dict(df):
     if df.shape[1] != 2:
@@ -727,28 +660,21 @@ def dodaj_igralcu_nametag(ime):
         raise ValueError("Igralec ni igral v sezoni 2023/24.")
     return slovar_nametagi[ime]
 
-
-
 def rojstni_datum(timestamp):
-    # Ensure the input is a Pandas Timestamp
     if isinstance(timestamp, pd.Timestamp):
-        # Convert the Timestamp to a date string in the 'YYYY-MM-DD' format
         return timestamp.strftime('%Y-%m-%d')
     else:
         raise ValueError("Input must be a Pandas Timestamp")
 
 
-# Funckija, ki sprinta SQL vrstico, pripravljeno za insert v tabelo.
+# Funckija, ki sprinta SQL vrstico podatkov o igralcu, pripravljeno za insert v tabelo.
 def igralec(sez):
     '''Funckija vzame seznam podatkov o igralcu in vrne vrstico, pripravljeno za v sql.'''
     nametag = dodaj_igralcu_nametag(str(sez[1]))
-    print(f"('{nametag}', '{sez[1]}', '{sez[2]}', {height_to_cm(sez[3])}, {rojstni_datum(sez[5])}),")
+    print(f"('{nametag}', '{sez[1]}', '{sez[2]}', {height_to_cm(sez[3])}, '{rojstni_datum(sez[5])}'),")
 
 
-
-##
-## Vsi igralci (zakomentirano, ker traja nekaj minut, da se vse izvede)
-##
+################################### Vsi igralci (zakomentirano, ker traja nekaj minut, da se vse izvede) ###################################
 #for key in slovar_ekip.keys():
 #    w = get_roster(key, 2024)
 #    dolzina = len(list(w.iloc[:,1]))
@@ -756,11 +682,15 @@ def igralec(sez):
 #        igralec(list(w.iloc[i, :]))
 #    
 
-# Ekipe, prippravljene za insert v tabelo.
+################################### Vse ekipe (zakomentirano) ###################################
 #for key in slovar_ekip.keys():
 #    print(f"('{slovar_ekip[key]}', '{key.title()}'),")
 
-# Tekme
+
+
+
+# Tekme: 
+# (dejansko uporabljena je bila koda v drugi datoetki, ker tu zraven ni identifikacijskih ključev)
 
 
 tekme = client.season_schedule(season_end_year=2024, output_type=OutputType.JSON)
@@ -771,7 +701,6 @@ def timestamp3(str):
     return postgresql_timestamp
 
 def tekme_v_sql(json1):
-    #df = pd.DataFrame(json1)
     df = pd.read_json(json1)
     dolzina = len(list(df.iloc[:,1]))
     for i in range(dolzina):
@@ -779,57 +708,6 @@ def tekme_v_sql(json1):
         gostujoca = slovar_ekip[df.iloc[i,0]]
         print(f"('{domaca}', '{gostujoca}', {df.iloc[i,3]}, {df.iloc[i, 1]}, {timestamp3(df.iloc[i, -1])}),") # Q je timestamp, moral bi bit zaokrožen datetime za postgresql
 
-# Tole so vse tekme, vključno s playoofi:
+# Tole so vse tekme, vključno s playoffi:
 #tekme_v_sql(tekme)
 
-
-
-## Podatki o tekmi.
-def je_vmes(postgresql_date, start_date, end_date):
-    postgresql_datetime = postgresql_date
-    #postgresql_datetime = datetime.strptime(postgresql_date, '%Y-%m-%d %H:%M:%S%z')
-    start_datetime = datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=postgresql_datetime.tzinfo)
-    end_datetime = datetime.strptime(end_date, '%Y-%m-%d').replace(tzinfo=postgresql_datetime.tzinfo)
-    return start_datetime <= postgresql_datetime <= end_datetime
-
-
-def doloci_izid(domace_tocke, gostujoce_tocke, ekipa, domaca_ekipa):
-    if (ekipa == domaca_ekipa and domace_tocke > gostujoce_tocke) or (ekipa != domaca_ekipa and gostujoce_tocke > domace_tocke):
-        return True
-    return False
-
-def get_game_data(engine, home_team, away_team, date):
-    query = f"""
-    SELECT id_tekma, domaca_ekipa_tocke, gostujoca_ekipa_tocke, domaca_ekipa FROM tekma
-    WHERE domaca_ekipa = '{home_team}' AND gostujoca_ekipa = '{away_team}' AND datum = '{date}'
-    """
-    game_data = pd.read_sql_query(query, engine)
-    return game_data
-
-def podatki_o_tekmah_igralca(igr):
-    a = get_game_logs(igr, 2024)
-    dolzina = dolzina = len(list(a.iloc[:,1]))
-    df = a.iloc[1:, [1, 4, 13, 14, 15, 16, 17, 19, 21]]
-    for i in range(dolzina):
-        datum = a.iloc[i, 0]
-        if je_vmes(datum, "2024-02-12", "2024-03-03"):
-            home_team = a.iloc[i, 1]
-            away_team = a.iloc[i, 2]
-            team = a.iloc[i, 5]
-            game_data = get_game_data(engine, home_team, away_team, datum)
-            if not game_data.empty:
-                id_tekme = game_data.iloc[0]['id_tekma']
-                home_score = game_data.iloc[0]['domaca_ekipa_tocke']
-                away_score = game_data.iloc[0]['gostujoca_ekipa_tocke']
-                home_team_db = game_data.iloc[0]['domaca_ekipa']
-                izid = doloci_izid(home_score, away_score, team, home_team_db)
-                interval = f"{df.iloc[i, 0][:2]} minutes {df.iloc[i, 0][3:]} seconds"
-                print(f"('{df.iloc[i, -1]}', {id_tekme}, {df.iloc[i, 1]}, {df.iloc[i, 4]}, {df.iloc[i, 5]}, {df.iloc[i, 6]}, {df.iloc[i, 2]}, {df.iloc[i, 3]}, INTERVAL '{interval}', {df.iloc[i, 7]}, {izid}),")
-
-
-
-engine = create_engine('postgresql://javnost:javnogeslo@localhost:5432/sem2024marcelb')
-
-# Naredi print za vse tekme vseh igralcev v danem tritedenskem intrevalu, ki se jih potem kopira iz izpisa terminala v create_db.sql.
-for igr in igralci.iloc[1:, 1]:
-    podatki_o_tekmah_igralca(igr)

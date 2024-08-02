@@ -6,14 +6,13 @@ from datetime import datetime, timedelta
 ######################################################################
 
 
-# Define the start and end dates
+# Začetni in končni datum (lahko le cca en teden naenkrat, dejansko so bili vzeti podatki za čas 26. februar do 17. marec 2024, čas po tekmi all star in tudi po koncu prestopnega roka).
 start_date = datetime.strptime('2024-03-11', '%Y-%m-%d')
 end_date = datetime.strptime('2024-03-17', '%Y-%m-%d')
 
-# Generate the list of dates
+# Datumi.
 datumi = []
 current_date = start_date
-
 while current_date <= end_date:
     datumi.append(current_date.strftime('%Y-%m-%d'))
     current_date += timedelta(days=1)
@@ -690,27 +689,18 @@ slovar_igr = [
 ('vukcetr01', 'Tristan Vukcevic', 'C', 213),
 ('wrighde01', 'Delon Wright', 'PG', 196)
 ]
-
-# Create a dictionary mapping player names to their IDs
-#slovar_igr_id = {a: b for b, a, c, d in slovar_igr}
-#slovar_igr_id = dict((a, b) for b, a, c, d in slovar_igr)
-
-
-
 slovar_igr_id = {}
 for t in slovar_igr:
     slovar_igr_id[t[1]] = t[0]
 
+# Data scraping
 for datum in datumi:
     url = f"https://api3.natst.at/cdb7-984332/playerperfs/NBA/{datum}"
     data = requests.get(url).json()
-
     # Extract performances
     performances = data['performances']
-
     # Process each performance and generate the data lines
     data_lines = []
-
     for performance_id, performance in performances.items():
         id_igralca = slovar_igr_id[performance['player']]
         id_tekme = int(performance['game']['code'])
@@ -723,7 +713,6 @@ for datum in datumi:
         odigrane_minute = int(performance['min'])
         tocke = int(performance['pts'])
         izid = 1 if performance['game']['winorloss'] == 'W' else 0
-
         data_line = (
             id_igralca, 
             id_tekme, 
@@ -737,17 +726,18 @@ for datum in datumi:
             tocke, 
             izid
         )
-
         data_lines.append(data_line)
-        print(f"{data_line},")
+        print(f"{data_line},") # v terminalu se printajo vrstice za v SQL
 
 
 ######################################################################
-# : Sopdaj je extraction tekem.
+# : Spodaj je extraction tekem.
 ######################################################################
+
 start_date = datetime.strptime('2024-02-26', '%Y-%m-%d')
 end_date = datetime.strptime('2024-03-17', '%Y-%m-%d')
 
+# Zato da v tekmah niso cela imena, kot prvotno da scraper, ampak le idji ekip
 kratka_dolga = [
 ('ATL', 'Atlanta Hawks'),
 ('BOS', 'Boston Celtics'),
@@ -785,7 +775,7 @@ kratka_dolga = [
 ]
 slovar = {ime: kratica for kratica, ime in kratka_dolga}
 
-# Generate the list of dates
+# Datumi
 datumi = []
 current_date = start_date
 
@@ -797,9 +787,7 @@ for datum in datumi:
     url = f"https://api3.natst.at/cdb7-984332/games/NBA/{datum}"
     data = requests.get(url).json()
     template = "({id_tekme}, '{home}', '{visitor}', {score_home}, {score_vis}, '{gameday}'),"
-
     games = data["games"]
-
     for game_id, game in games.items():
         sql_line = template.format(
             id_tekme=game['id'],
@@ -1661,7 +1649,6 @@ for t in igralci:
         print(ime)
 
 for t in igralci2:
-    #print(f"{t},")
     continue
 
 sez = []

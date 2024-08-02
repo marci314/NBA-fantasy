@@ -1,5 +1,4 @@
--- Active: 1715255540772@@baza.fmf.uni-lj.si@5432@sem2024_jostp@public
-# To so vse tekme v tednih med 12. februarjem in 3. marcem. /Za popravit!
+-- Vse tekme med 26. 2. 2024 in 17. 3. 2024
 INSERT INTO tekma (id_tekma, domaca_ekipa, gostujoca_ekipa, domaca_ekipa_tocke, gostujoca_ekipa_tocke, datum) VALUES
 (1077106, 'MEM', 'BRK', 86, 111, '2024-02-26'),
 (1077515, 'DET', 'NYK', 111, 113, '2024-02-26'),
@@ -158,7 +157,7 @@ INSERT INTO tekma (id_tekma, domaca_ekipa, gostujoca_ekipa, domaca_ekipa_tocke, 
 (1077904, 'MIL', 'PHO', 140, 129, '2024-03-17'),
 (1078054, 'ORL', 'TOR', 111, 96, '2024-03-17');
 
-# Vsi ekipe v ligi.
+-- Vse ekipe v ligi.
 INSERT INTO ekipa (ekipa_id, ekipa_ime) VALUES
 ('ATL', 'Atlanta Hawks'),
 ('BOS', 'Boston Celtics'),
@@ -191,6 +190,7 @@ INSERT INTO ekipa (ekipa_id, ekipa_ime) VALUES
 ('UTA', 'Utah Jazz'),
 ('WAS', 'Washington Wizards');
 
+-- Igralci:
 INSERT INTO igralec (igralec_id, ime, pozicija, visina, rojstvo) VALUES
 ('beysa01', 'Saddiq Bey', 'SF', 201, '1999-04-09'),
 ('bogdabo01', 'Bogdan Bogdanovic', 'SG', 196, '1992-08-18'),
@@ -765,7 +765,7 @@ INSERT INTO igralec (igralec_id, ime, pozicija, visina, rojstvo) VALUES
 ('shamela01', 'Landry Shamet', 'SG', 193, '1997-03-13'),
 ('vukcetr01', 'Tristan Vukcevic', 'C', 213, '2003-03-11');
 
-########## Podatki o tekmah: (26. februar do 17. marec, torej trije tedni)
+-- Podatki o tekmah: (26. februar do 17. marec, torej trije tedni)
 INSERT INTO podatki_o_tekmi (id_igralca, id_tekme, odstotek_meta, ukradene, bloki, izgubljene, skoki, podaje, odigrane_minute, tocke, izid) VALUES
 ('huertke01', 1077866, 0.3333333333333333, 0, 1, 0, 5, 2, 37, 14, 0),
 ('hartjo01', 1079152, 0.47058823529411764, 2, 1, 1, 8, 6, 41, 23, 1),
