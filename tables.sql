@@ -108,3 +108,24 @@ CREATE TABLE igralci_tocke (
     tocke INT,
     PRIMARY KEY (id_igralca, id_tekme)
 );
+
+
+CREATE TABLE igralci_ekipe (
+    id_igralca TEXT,
+    id_ekipa TEXT
+);
+
+INSERT INTO igralci_ekipe (id_igralca, id_ekipa)
+SELECT DISTINCT
+    po.id_igralca,
+    CASE
+        WHEN t.domaca_ekipa_tocke > t.gostujoca_ekipa_tocke AND po.izid = 1 THEN t.domaca_ekipa
+        WHEN t.domaca_ekipa_tocke < t.gostujoca_ekipa_tocke AND po.izid = 1 THEN t.gostujoca_ekipa
+        WHEN t.domaca_ekipa_tocke > t.gostujoca_ekipa_tocke AND po.izid = 0 THEN t.gostujoca_ekipa
+        WHEN t.domaca_ekipa_tocke < t.gostujoca_ekipa_tocke AND po.izid = 0 THEN t.domaca_ekipa
+    END AS id_ekipa
+FROM
+    podatki_o_tekmi po
+JOIN
+    tekma t ON po.id_tekme = t.id_tekma;
+

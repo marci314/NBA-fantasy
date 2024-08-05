@@ -115,7 +115,7 @@ def domov():
 
     # Preveri igralce
     cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.priimek, igralec.pozicija, igralec.visina, igralec.rojstvo
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo
         FROM igralec
         JOIN fantasy_ekipa_igralci ON igralec.igralec_id = fantasy_ekipa_igralci.igralec_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_igralci.f_ekipa_id
@@ -264,7 +264,7 @@ def prikazi_ekipo(ekipa_id):
 
     # Pridobimo igralce v ekipi
     cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.priimek, igralec.pozicija, igralec.visina, igralec.rojstvo
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo
         FROM igralec
         JOIN fantasy_ekipa_igralci ON igralec.igralec_id = fantasy_ekipa_igralci.igralec_id
         WHERE fantasy_ekipa_igralci.f_ekipa_id = %s
