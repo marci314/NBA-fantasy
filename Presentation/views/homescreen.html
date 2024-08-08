@@ -128,6 +128,7 @@
                         <th>Pozicija</th>
                         <th>Višina (cm)</th>
                         <th>Datum Rojstva</th>
+                        <th>Ekipa</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -140,11 +141,12 @@
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
                             <td>{{player[4]}}</td>
+                            <td>{{player[5]}}</td> 
                         </tr>
                         % end
                     % else:
                         <tr>
-                            <td colspan="7">Ni igralcev v ekipi.</td>
+                            <td colspan="8">Ni igralcev v ekipi.</td>
                         </tr>
                     % end
                 </tbody>
@@ -157,6 +159,7 @@
                         <th>ID Trenerja</th>
                         <th>Ime</th>
                         <th>Datum Rojstva</th>
+                        <th>Ekipa</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -166,10 +169,11 @@
                             <td>{{coach[0]}}</td>
                             <td>{{coach[1]}}</td>
                             <td>{{coach[2]}}</td>
+                            <td>{{coach[3]}}</td> 
                         </tr>
                     % else:
                         <tr>
-                            <td colspan="4">Ni trenerja v ekipi.</td>
+                            <td colspan="5">Ni trenerja v ekipi.</td>
                         </tr>
                     % end
                 </tbody>

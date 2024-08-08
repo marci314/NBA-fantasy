@@ -108,27 +108,28 @@ def dodaj_ekipo_ob_registraciji(user_id, teamname):
 @cookie_required
 def domov():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
-    print(f"Uporabnik {uporabnisko_ime} dostopa do homescreen.")
     user = auth_service.klice_uporabnika(uporabnisko_ime)
 
     cur = auth_service.cur
 
     # Preveri igralce
     cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, igralci_ekipe.id_ekipa
         FROM igralec
         JOIN fantasy_ekipa_igralci ON igralec.igralec_id = fantasy_ekipa_igralci.igralec_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_igralci.f_ekipa_id
+        LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
         WHERE fantasy_ekipa.lastnik = %s
     """, (user.uporabnik_id,))
     players = cur.fetchall()
 
     # Preveri trenerja
     cur.execute("""
-        SELECT trener.trener_id, trener.ime, trener.rojstvo
+        SELECT trener.trener_id, trener.ime, trener.rojstvo, trenerji_ekipe.ekipa_id
         FROM trener
         LEFT JOIN fantasy_ekipa_trener ON trener.trener_id = fantasy_ekipa_trener.trener_id
         JOIN fantasy_ekipa ON fantasy_ekipa.f_ekipa_id = fantasy_ekipa_trener.f_ekipa_id
+        LEFT JOIN trenerji_ekipe ON trenerji_ekipe.trener_id = trener.trener_id
         WHERE fantasy_ekipa.lastnik = %s
     """, (user.uporabnik_id,))
     coach = cur.fetchone()
@@ -195,8 +196,14 @@ def izberi_datum():
 
 @app.get('/spreminjaj_igralce')
 def spreminjaj_igralce():
-    players = repo.get_all_players()
+    cur.execute("""
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni ekipe') AS id_ekipa
+        FROM igralec
+        LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
+    """)
+    players = cur.fetchall()
     return template('spreminjaj_igralce.html', players=players, error=None)
+
 
 @app.post('/dodaj_igralca')
 def dodaj_igralca():
@@ -222,9 +229,14 @@ def dodaj_igralca():
 
 @app.get('/spreminjaj_trenerja')
 def spreminjaj_trenerja():
-    cur.execute("SELECT * FROM trener")
+    cur.execute("""
+        SELECT trener.trener_id, trener.ime, trener.rojstvo, COALESCE(trenerji_ekipe.ekipa_id, 'Ni ekipe') AS ekipa_id
+        FROM trener
+        LEFT JOIN trenerji_ekipe ON trenerji_ekipe.trener_id = trener.trener_id
+    """)
     coaches = cur.fetchall()
     return template('spreminjaj_trenerja.html', coaches=coaches, error=None)
+
 
 @app.get('/dodaj_trenerja/<coach_id>')
 def dodaj_trenerja(coach_id):

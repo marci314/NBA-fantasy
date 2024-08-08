@@ -129,3 +129,7 @@ FROM
 JOIN
     tekma t ON po.id_tekme = t.id_tekma;
 
+CREATE TABLE trenerji_ekipe (
+    trener_id INTEGER,
+    ekipa_id TEXT
+);
