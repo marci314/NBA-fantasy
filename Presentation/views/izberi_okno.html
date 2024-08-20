@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <title>Simuliraj Tekme - NBA Fantasy League</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 25px;
+            color: #333;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Izberi Časovno Okno</h1>
+        <form action="/simuliraj_tekme" method="post">
+            <div class="input-container">
+                <label for="start-date">Začetni datum:</label>
+                <select id="start-date" name="start_date" required>
+                    % for date in dates:
+                    <option value="{{date}}">{{date}}</option>
+                    % end
+                </select>
+            </div>
+            <div class="input-container">
+                <label for="end-date">Končni datum:</label>
+                <select id="end-date" name="end_date" required>
+                    % for date in dates:
+                    <option value="{{date}}">{{date}}</option>
+                    % end
+                </select>
+            </div>
+            <button type="submit">Odigraj Tekme</button>
+        </form>
+    </div>
+</body>
+</html>

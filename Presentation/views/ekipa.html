@@ -78,7 +78,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID Igralca</th>
                     <th>Ime</th>
                     <th>Pozicija</th>
                     <th>Višina (cm)</th>
@@ -88,7 +87,6 @@
             <tbody>
                 % for player in players:
                 <tr>
-                    <td>{{player[0]}}</td>
                     <td>{{player[1]}}</td>
                     <td>{{player[2]}}</td>
                     <td>{{player[3]}}</td>
@@ -101,7 +99,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID Trenerja</th>
                     <th>Ime</th>
                     <th>Datum Rojstva</th>
                 </tr>
@@ -109,13 +106,12 @@
             <tbody>
                 % if coach:
                 <tr>
-                    <td>{{coach[0]}}</td>
                     <td>{{coach[1]}}</td>
                     <td>{{coach[2]}}</td>
                 </tr>
                 % else:
                 <tr>
-                    <td colspan="3">Ni trenerja v ekipi.</td>
+                    <td colspan="2">Ni trenerja v ekipi.</td>
                 </tr>
                 % end
             </tbody>

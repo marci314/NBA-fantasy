@@ -30,14 +30,25 @@
             color: #333;
         }
 
+        .table-container {
+            max-height: 400px; /* Omeji višino vsebnika za tabelo */
+            overflow-y: auto; /* Omogoči notranje skrolanje */
+            width: 100%; /* Določi širino vsebnika */
+            margin-bottom: 20px; /* Dodaj nekaj prostora pod tabelo */
+            border: 1px solid #ddd; /* Dodaj rob okoli vsebnika */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Rahla senca okoli tabele */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
 
         thead {
             background-color: #f1f1f1;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
         th, td {
@@ -63,6 +74,7 @@
         .error {
             color: red;
             margin-bottom: 20px;
+            font-weight: bold;
         }
 
         .button-container {
@@ -75,36 +87,38 @@
 <body>
     <div class="container">
         <h1>Dodaj Igralce</h1>
+
         % if error:
         <p class="error">{{error}}</p>
         % end
+
         <form action="/dodaj_igralca" method="post">
-            <table id="player-table">
-                <thead>
-                    <tr>
-                        <th>Izberi</th>
-                        <th>ID Igralca</th>
-                        <th>Ime</th>
-                        <th>Pozicija</th>
-                        <th>Višina (cm)</th>
-                        <th>Datum Rojstva</th>
-                        <th>Ekipa</th> 
-                    </tr>
-                </thead>
-                <tbody>
-                    % for player in players:
-                    <tr>
-                        <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
-                        <td>{{player[0]}}</td>
-                        <td>{{player[1]}}</td>
-                        <td>{{player[2]}}</td>
-                        <td>{{player[3]}}</td>
-                        <td>{{player[4]}}</td>
-                        <td>{{player[5]}}</td> 
-                    </tr>
-                    % end
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table id="player-table">
+                    <thead>
+                        <tr>
+                            <th>Izberi</th>
+                            <th>Ime</th>
+                            <th>Pozicija</th>
+                            <th>Višina (cm)</th>
+                            <th>Datum Rojstva</th>
+                            <th>Ekipa</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        % for player in players:
+                        <tr>
+                            <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
+                            <td>{{player[1]}}</td>
+                            <td>{{player[2]}}</td>
+                            <td>{{player[3]}}</td>
+                            <td>{{player[4]}}</td>
+                            <td>{{player[5]}}</td> 
+                        </tr>
+                        % end
+                    </tbody>
+                </table>
+            </div>
             <div class="button-container">
                 <button type="submit">Dodaj igralca</button>
             </div>

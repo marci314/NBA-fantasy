@@ -108,7 +108,7 @@
         </header>
         <div class="sidebar">
             <button onclick="window.location.href='/odjava'">Odjava</button>
-            <button onclick="window.location.href='/odigraj_teden'">Odigraj teden</button>
+            <button onclick="window.location.href='/simuliraj_tekme'">Simuliraj tekme</button> <!-- Spremenjen gumb -->
             <button onclick="window.location.href='/spreminjaj_igralce'">Dodaj igralce</button>
             <button onclick="window.location.href='/spreminjaj_trenerja'">Dodaj trenerja</button>
             <button id="remove-player">Odstrani igralca</button>
@@ -123,7 +123,6 @@
                 <thead>
                     <tr>
                         <th>Izberi</th>
-                        <th>ID Igralca</th>
                         <th>Ime</th>
                         <th>Pozicija</th>
                         <th>Višina (cm)</th>
@@ -136,7 +135,6 @@
                         % for player in players:
                         <tr>
                             <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
-                            <td>{{player[0]}}</td>
                             <td>{{player[1]}}</td>
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
@@ -146,7 +144,7 @@
                         % end
                     % else:
                         <tr>
-                            <td colspan="8">Ni igralcev v ekipi.</td>
+                            <td colspan="6">Ni igralcev v ekipi.</td>
                         </tr>
                     % end
                 </tbody>
@@ -156,7 +154,6 @@
                 <thead>
                     <tr>
                         <th>Izberi</th>
-                        <th>ID Trenerja</th>
                         <th>Ime</th>
                         <th>Datum Rojstva</th>
                         <th>Ekipa</th> 
@@ -166,14 +163,13 @@
                     % if coach:
                         <tr>
                             <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
-                            <td>{{coach[0]}}</td>
                             <td>{{coach[1]}}</td>
                             <td>{{coach[2]}}</td>
                             <td>{{coach[3]}}</td> 
                         </tr>
                     % else:
                         <tr>
-                            <td colspan="5">Ni trenerja v ekipi.</td>
+                            <td colspan="4">Ni trenerja v ekipi.</td>
                         </tr>
                     % end
                 </tbody>

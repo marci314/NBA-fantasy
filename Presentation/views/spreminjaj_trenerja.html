@@ -30,14 +30,25 @@
             color: #333;
         }
 
+        .table-container {
+            max-height: 400px; /* Omeji višino vsebnika za tabelo */
+            overflow-y: auto; /* Omogoči notranje skrolanje */
+            width: 100%; /* Določi širino vsebnika */
+            margin-bottom: 20px; /* Dodaj nekaj prostora pod tabelo */
+            border: 1px solid #ddd; /* Dodaj rob okoli vsebnika */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Rahla senca okoli tabele */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
 
         thead {
             background-color: #f1f1f1;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
         th, td {
@@ -72,28 +83,28 @@
         % if error:
         <p class="error">{{error}}</p>
         % end
-        <table id="coach-table">
-            <thead>
-                <tr>
-                    <th>Izberi</th>
-                    <th>ID Trenerja</th>
-                    <th>Ime</th>
-                    <th>Datum Rojstva</th>
-                    <th>Ekipa</th> 
-                </tr>
-            </thead>
-            <tbody>
-                % for coach in coaches:
-                <tr>
-                    <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
-                    <td>{{coach[0]}}</td>
-                    <td>{{coach[1]}}</td>
-                    <td>{{coach[2]}}</td>
-                    <td>{{coach[3]}}</td> 
-                </tr>
-                % end
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table id="coach-table">
+                <thead>
+                    <tr>
+                        <th>Izberi</th>
+                        <th>Ime</th>
+                        <th>Datum Rojstva</th>
+                        <th>Ekipa</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    % for coach in coaches:
+                    <tr>
+                        <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
+                        <td>{{coach[1]}}</td>
+                        <td>{{coach[2]}}</td>
+                        <td>{{coach[3]}}</td> 
+                    </tr>
+                    % end
+                </tbody>
+            </table>
+        </div>
         <button id="add-coach">Dodaj trenerja</button>
         <button onclick="window.location.href='/homescreen'">Nazaj</button>
     </div>

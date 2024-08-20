@@ -204,7 +204,6 @@ def spreminjaj_igralce():
     players = cur.fetchall()
     return template('spreminjaj_igralce.html', players=players, error=None)
 
-
 @app.post('/dodaj_igralca')
 def dodaj_igralca():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
@@ -224,8 +223,9 @@ def dodaj_igralca():
     rezultat = repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
     players = repo.get_all_players()
     if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
-        return template('spreminjaj_igralce.html', players=players, error=rezultat)
+        return template('spreminjaj_igralce.html', players=players, error=rezultat)  # Prikaz napake v predlogi
     return redirect('/spreminjaj_igralce')
+
 
 @app.get('/spreminjaj_trenerja')
 def spreminjaj_trenerja():
@@ -236,7 +236,6 @@ def spreminjaj_trenerja():
     """)
     coaches = cur.fetchall()
     return template('spreminjaj_trenerja.html', coaches=coaches, error=None)
-
 
 @app.get('/dodaj_trenerja/<coach_id>')
 def dodaj_trenerja(coach_id):
@@ -249,11 +248,11 @@ def dodaj_trenerja(coach_id):
     f_ekipa_id = cur.fetchone()[0]
     
     rezultat = repo.dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
-    cur.execute("SELECT * FROM trener")
-    coaches = cur.fetchall()
+    coaches = repo.get_all_coaches()
     if "Ekipa že ima trenerja." in rezultat:
-        return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)
+        return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)  # Prikaz napake v predlogi
     return redirect('/spreminjaj_trenerja')
+
 
 @app.get('/ekipa/<ekipa_id>')
 def prikazi_ekipo(ekipa_id):
@@ -345,6 +344,60 @@ def prikazi_tekmo(id_tekma):
                     domaci_trener=domaci_trener, 
                     gostujoci_igralci=gostujoci_igralci, 
                     gostujoci_trener=gostujoci_trener)
+
+
+
+@app.get('/simuliraj_tekme')
+def prikazi_izbor_tekem():
+    cur.execute("SELECT DISTINCT datum FROM tekma ORDER BY datum ASC")
+    dates = cur.fetchall()
+    dates = [row[0] for row in dates]  # Pretvorimo v seznam datumov
+    return template('izberi_okno.html', dates=dates)
+
+
+@app.post('/simuliraj_tekme')
+def simuliraj_tekme():
+    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
+    if not uporabnisko_ime:
+        return redirect('/prijava')
+    
+    # Preberemo datume iz obrazca
+    start_date = request.forms.get('start_date')
+    end_date = request.forms.get('end_date')
+    
+    # Pridobimo uporabnika in njegovo ekipo
+    user = auth_service.klice_uporabnika(uporabnisko_ime)
+    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
+    f_ekipa_id = cur.fetchone()[0]
+    
+    # Pridobimo vse tekme v izbranem časovnem oknu
+    cur.execute("""
+        SELECT p.*, t.datum
+        FROM podatki_o_tekmi p
+        JOIN tekma t ON p.id_tekme = t.id_tekma
+        WHERE t.datum BETWEEN %s AND %s
+    """, (start_date, end_date))
+    tekme = cur.fetchall()
+
+    # Pridobimo vse igralce v fantasy ekipi
+    cur.execute("SELECT id_igralca FROM fantasy_ekipa_igralci WHERE f_ekipa_id = %s", (f_ekipa_id,))
+    igralci = cur.fetchall()
+    
+    skupne_tocke = 0
+    
+    # Izračunajmo točke za vsakega igralca
+    for tekma in tekme:
+        if tekma['id_igralca'] in [i[0] for i in igralci]:
+            podatki = PodatkiOTekmi(tekma)  # Pretvorba v objekt, če je potreben
+            tocke = izracunaj_tocke(podatki)
+            skupne_tocke += tocke
+
+    # Posodobimo točke ekipe
+    cur.execute("UPDATE fantasy_ekipa SET tocke = tocke + %s WHERE f_ekipa_id = %s", (skupne_tocke, f_ekipa_id))
+    auth_service.conn.commit()
+
+    return redirect('/homescreen')
+
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

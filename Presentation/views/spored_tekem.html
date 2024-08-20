@@ -30,14 +30,25 @@
             color: #333;
         }
 
+        .table-container {
+            max-height: 400px; /* Omeji višino vsebnika za tabelo */
+            overflow-y: auto; /* Omogoči notranje skrolanje */
+            width: 100%; /* Določi širino vsebnika */
+            margin-bottom: 20px; /* Dodaj nekaj prostora pod tabelo */
+            border: 1px solid #ddd; /* Dodaj rob okoli vsebnika */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Rahla senca okoli tabele */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
 
         thead {
             background-color: #f1f1f1;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
         th, td {
@@ -64,26 +75,26 @@
 <body>
     <div class="container">
         <h1>Spored Tekem</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Tekme</th>
-                    <th>Domaca Ekipa</th>
-                    <th>Gostujoca Ekipa</th>
-                    <th>Datum</th>
-                </tr>
-            </thead>
-            <tbody>
-                % for match in matches:
-                <tr>
-                    <td>{{match['id_tekma']}}</td>
-                    <td>{{match['domaca_ekipa']}}</td>
-                    <td>{{match['gostujoca_ekipa']}}</td>
-                    <td><a href="/tekma/{{match['id_tekma']}}">{{match['datum']}}</a></td>
-                </tr>
-                % end
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Domaca Ekipa</th>
+                        <th>Gostujoca Ekipa</th>
+                        <th>Datum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % for match in matches:
+                    <tr>
+                        <td>{{match['domaca_ekipa']}}</td>
+                        <td>{{match['gostujoca_ekipa']}}</td>
+                        <td><a href="/tekma/{{match['id_tekma']}}">{{match['datum']}}</a></td>
+                    </tr>
+                    % end
+                </tbody>
+            </table>
+        </div>
         <button onclick="window.location.href='/homescreen'">Nazaj</button>
     </div>
 </body>
