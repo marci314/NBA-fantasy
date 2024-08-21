@@ -43,6 +43,10 @@ def cookie_required(f):
 def domaca_stran():
     return template('domaca_stran.html')
 
+@app.route('/static/<filename:path>')
+def static_files(filename):
+    return static_file(filename, root='Presentation/static')
+
 @app.get('/prijava')
 def prijava_get():
     return template("prijava.html", napaka="")
@@ -503,5 +507,17 @@ def simuliraj_tekme_route():
     except Exception as e:
         # V primeru napake vrnemo datume in napako
         return template('izberi_okno.html', error=str(e), dates=dates)
+    
+@app.get('/ponastavi_tocke')
+def ponastavi_tocke():
+    try:
+        # Posodobi vse ekipe, da imajo točke enake 0
+        cur.execute("UPDATE fantasy_ekipa SET tocke = 0")
+        conn.commit()
+    except Exception:
+        # Ne izpiše napake, ampak vseeno preusmeri
+        pass
+    return redirect('/lestvica') 
+
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

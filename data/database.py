@@ -8,13 +8,12 @@ import Data.auth_public as auth
 import math
 from typing import List, Dict
 
-# Preberemo port za bazo iz okoljskih spremenljivk
+
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
 class Repo:
 
     def __init__(self):
-        # Ko ustvarimo novo instanco definiramo objekt za povezavo in cursor
         self.conn = psycopg2.connect(database=auth.dbname, host=auth.host, user=auth.user, password=auth.password, port=DB_PORT)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
@@ -45,7 +44,6 @@ class Repo:
 
     def odstrani_igralca_iz_fantasy_ekipe(self, f_ekipa_id: int, igralec_id: str) -> None:
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-            # Odstrani igralca iz fantazijske ekipe
             cur.execute("""
                 DELETE FROM fantasy_ekipa_igralci
                 WHERE f_ekipa_id = %s AND igralec_id = %s
@@ -71,7 +69,6 @@ class Repo:
             return "Trener je bil uspešno dodan."
     
     def odstrani_trenerja_iz_fantasy_ekipe(self, f_ekipa_id: int, trener_id: str) -> None:
-        # Odstrani trenerja iz fantazijske ekipe
         self.cur.execute("""
             DELETE FROM fantasy_ekipa_trener
             WHERE f_ekipa_id = %s AND trener_id = %s
@@ -85,7 +82,6 @@ class Repo:
             return cur.fetchall()
     
     def ustvari_fantasy_ekipo(self, fantasy_ekipa: FantasyEkipa) -> FantasyEkipa:
-        # Preveri, da nima uporabnik več kot treh ekip
         self.cur.execute("""
             SELECT COUNT(*) FROM fantasy_ekipa
             WHERE lastnik = %s
@@ -93,7 +89,6 @@ class Repo:
         count = self.cur.fetchone()[0]
         if count >= 3:
             return "Uporabnik ima že maksimalno dovoljeno število ekip."
-        # Preveri, ali ekipa s tem imenom že obstaja
         self.cur.execute("""
             SELECT * FROM fantasy_ekipa
             WHERE ime_ekipe = %s
@@ -103,14 +98,13 @@ class Repo:
             fantasy_ekipa.ime_ekipe = row['ime_ekipe']
             return fantasy_ekipa
         
-        # Vstavi novo ekipo
         self.cur.execute("""
             INSERT INTO fantasy_ekipa (ime_ekipe)
             VALUES (%s)
             RETURNING f_ekipe_id
             """, (fantasy_ekipa.ime_ekipe))
         
-        fantasy_ekipa.f_ekipa_id = self.cur.fetchone()['f_ekipa_id'] # morda treba dodati še za točke in igralce? ali je 0 default okj
+        fantasy_ekipa.f_ekipa_id = self.cur.fetchone()['f_ekipa_id']
         self.conn.commit()
         return fantasy_ekipa
     
@@ -124,7 +118,6 @@ class Repo:
     def pokazi_ekipo(self, ime_ekipe: str) -> dict:
         '''Pokaže uporabnikovo fantasy ekipo z imeni igralcev in trenerja ter njihovimi točkami.'''
 
-        # Preveri, ali ekipa z danim imenom obstaja
         self.cur.execute("""
             SELECT f_ekipa_id, tocke, ime_ekipe
             FROM fantasy_ekipa
@@ -139,7 +132,6 @@ class Repo:
         team_id = team['f_ekipa_id']
         tocke = team['tocke']
 
-        # Pridobi igralce v ekipi
         self.cur.execute("""
             SELECT i.igralec_id, i.ime, i.priimek, i.pozicija, i.visina, i.rojstvo
             FROM igralec i
@@ -148,7 +140,6 @@ class Repo:
             """, (team_id,))
         players = self.cur.fetchall()
 
-        # Pridobi trenerje v ekipi
         self.cur.execute("""
             SELECT t.trener_id, t.ime, t.priimek, t.rojstvo
             FROM trener t
@@ -157,7 +148,6 @@ class Repo:
             """, (team_id,))
         coaches = self.cur.fetchall()
 
-        # Sestavi rezultat v obliki slovarja
         result = {
             'ime_ekipe': ime_ekipe,
             'tocke': tocke,
@@ -170,10 +160,8 @@ class Repo:
     def odigraj_teden(self, izbrani_datum: datetime.date) -> str:
         '''Izvede tekme za naslednji teden in prišteje točke ekipam.'''
         
-        # Izračunaj datum za naslednji teden
         naslednji_teden = izbrani_datum + datetime.timedelta(days=7)
         
-        # Preveri, ali so podatki o tekmi za naslednji teden na voljo
         self.cur.execute("""
             SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum 
             FROM tekma
@@ -184,7 +172,6 @@ class Repo:
         if not tekme:
             return "Za izbrani datum ni podatkov o tekmah za naslednji teden."
         
-        # Izvedi tekme za naslednji teden
         for tekma in tekme:
             id_tekma = tekma['id_tekma']
             rezultat = self.odigraj_kolo(id_tekma)

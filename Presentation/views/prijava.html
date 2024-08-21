@@ -48,8 +48,13 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
         .btn {
-            width: 100%;
+            width: calc(48% - 10px);
             padding: 10px;
             font-size: 16px;
             background-color: #007bff;
@@ -80,7 +85,10 @@
                 <label for="password">Geslo:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn">Prijava</button>
+            <div class="btn-container">
+                <button type="submit" class="btn">Prijava</button>
+                <button type="button" class="btn" onclick="window.location.href='/'">Nazaj</button>
+            </div>
         </form>
     </div>
 </body>

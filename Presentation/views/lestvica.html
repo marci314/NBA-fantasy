@@ -8,11 +8,13 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background: url('/static/Images/teams.jpg') no-repeat center center fixed;
+            background-size: contain; /* Prilagodi sliko širini strani */
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f9f9f9;
             color: #333;
+            height: 100vh;
         }
 
         .container {
@@ -21,7 +23,11 @@
             align-items: center;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: auto;
+            background-color: rgba(255, 255, 255, 0.95); /* Bele barve z malo prosojnosti */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
@@ -34,6 +40,8 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.95); /* Prosojna miza */
+            border-radius: 10px;
         }
 
         thead {
@@ -44,6 +52,12 @@
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Dodaj razmik med gumbi */
         }
 
         button {
@@ -67,22 +81,25 @@
         <table id="leaderboard-table">
             <thead>
                 <tr>
-                    <th>ID Ekipe</th>
+                    <th>Mesto</th>
                     <th>Ime Ekipe</th>
                     <th>Točke</th>
                 </tr>
             </thead>
             <tbody>
-                % for team in teams:
+                % for index, team in enumerate(teams, start=1):
                 <tr>
-                    <td>{{team[0]}}</td>
+                    <td>{{index}}</td> <!-- Mesto ekipe -->
                     <td><a href="/ekipa/{{team[0]}}">{{team[1]}}</a></td>
                     <td>{{team[2]}}</td>
                 </tr>
                 % end
             </tbody>
         </table>
-        <button onclick="window.location.href='/homescreen'">Nazaj</button>
+        <div class="button-container">
+            <button onclick="window.location.href='/homescreen'">Nazaj</button>
+            <button onclick="window.location.href='/ponastavi_tocke'">Ponastavi točke</button>
+        </div>
     </div>
 </body>
 </html>
