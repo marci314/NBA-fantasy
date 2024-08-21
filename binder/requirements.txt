@@ -1,5 +1,2 @@
-jupyter-server-proxy
 psycopg2
 requests
-datetime
-timedelta
