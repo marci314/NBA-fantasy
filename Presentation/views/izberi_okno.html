@@ -51,11 +51,28 @@
         .input-container {
             margin-bottom: 20px;
         }
+
+        .error {
+            color: red;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Razmik med gumbi */
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Izberi Časovno Okno</h1>
+        % if error:
+        <p class="error">{{error}}</p>
+        % else:
+        <p class="error"></p>
+        % end
         <form action="/simuliraj_tekme" method="post">
             <div class="input-container">
                 <label for="start-date">Začetni datum:</label>
@@ -73,7 +90,10 @@
                     % end
                 </select>
             </div>
-            <button type="submit">Odigraj Tekme</button>
+            <div class="button-container">
+                <button type="submit">Odigraj Tekme</button>
+                <button type="button" onclick="window.location.href='/homescreen'">Nazaj</button>
+            </div>
         </form>
     </div>
 </body>

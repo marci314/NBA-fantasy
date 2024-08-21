@@ -8,7 +8,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background: url('/static/Images/trophies.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: #333;
             display: flex;
             flex-direction: column;
@@ -21,15 +22,21 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         header {
             width: 100%;
             padding: 10px;
-            background-color: #e9e9e9;
+            background-color: rgba(233, 233, 233, 0.85); /* Prosojno ozadje za header */
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
         header h1 {
@@ -40,7 +47,7 @@
 
         .sidebar {
             width: 150px;
-            background-color: #e9e9e9;
+            background-color: rgba(233, 233, 233, 0.85); /* Prosojna stranska vrstica */
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -50,6 +57,7 @@
             right: 0;
             height: calc(100% - 50px);
             box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
         }
 
         .sidebar button, .sidebar form button {
@@ -77,17 +85,20 @@
         main {
             flex-grow: 1;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.85); /* Prosojno ozadje */
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-right: 170px; /* Make space for the fixed sidebar */
+            border-radius: 10px;
         }
 
         table {
             width: 80%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.95); /* Prosojna miza */
+            border-radius: 10px;
         }
 
         thead {
@@ -108,14 +119,14 @@
         </header>
         <div class="sidebar">
             <button onclick="window.location.href='/odjava'">Odjava</button>
-            <button onclick="window.location.href='/simuliraj_tekme'">Simuliraj tekme</button> <!-- Spremenjen gumb -->
+            <button onclick="window.location.href='/simuliraj_tekme'">Simuliraj tekme</button>
             <button onclick="window.location.href='/spreminjaj_igralce'">Dodaj igralce</button>
             <button onclick="window.location.href='/spreminjaj_trenerja'">Dodaj trenerja</button>
             <button id="remove-player">Odstrani igralca</button>
             <button id="remove-coach">Odstrani trenerja</button>
             <button onclick="window.location.href='/lestvica'">Poglej lestvico</button>
             <button onclick="window.location.href='/spored_tekem'">Spored tekem</button>
-            <img src="/static/nba-logo.jpg" alt="Logo">
+            <img src="/static/Images/nba-logo.jpg" alt="Logo">
         </div>
         <main>
             <h2>Igralci</h2>

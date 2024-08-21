@@ -3,73 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA Fantasy Login</title>
+    <title>Prijava - NBA Fantasy League</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-            font-family: Arial, sans-serif;
         }
-        .login-container {
+        .container {
+            width: 320px;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 320px;
-            box-sizing: border-box;
         }
-        .login-container img {
-            width: 100px;
+        .logo {
             margin-bottom: 20px;
         }
-        .login-container input {
-            width: calc(100% - 22px);
+        .logo img {
+            max-width: 100%;  /* Prilagodi širino slike velikosti kontejnerja */
+            height: auto;  /* Ohranimo razmerje stranic slike */
+            border-radius: 8px;  /* Rahlo zaobljeni robovi za boljši izgled */
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
             padding: 10px;
-            margin: 10px 0;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
         }
-        .login-container button {
-            width: 48%;
+        .btn {
+            width: 100%;
             padding: 10px;
-            margin: 10px 1%;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
             border: none;
             border-radius: 5px;
-            background-color: #007BFF;
-            color: white;
             cursor: pointer;
-            box-sizing: border-box;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
         }
-        .login-container button:hover {
+        .btn:hover {
             background-color: #0056b3;
-        }
-        .error-message {
-            color: red;
-            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <img src="/static/nba-logo.jpg" alt="NBA Logo">
-        <h2>Prijava</h2>
+    <div class="container">
+        <div class="logo">
+            <img src="/static/Images/nba-logo.jpg" alt="NBA Fantasy League Logo">
+        </div>
+        <h1>Prijava</h1>
         <form action="/prijava" method="post">
-            <input type="text" name="username" placeholder="Uporabniško ime" required>
-            <input type="password" name="password" placeholder="Geslo" required>
-            <div>
-                <button type="submit" name="action" value="login">Prijava</button>
-                <button type="button" onclick="window.location.href='/'">Nazaj</button>
+            <div class="input-group">
+                <label for="username">Uporabniško ime:</label>
+                <input type="text" id="username" name="username" required>
             </div>
+            <div class="input-group">
+                <label for="password">Geslo:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Prijava</button>
         </form>
-        % if napaka:
-            <p class="error-message">{{napaka}}</p>
-        % end
     </div>
 </body>
 </html>

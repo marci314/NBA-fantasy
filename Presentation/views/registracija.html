@@ -24,8 +24,10 @@
             box-sizing: border-box;
         }
         .create-account-container img {
-            width: 100px;
+            max-width: 100%;  /* Prilagodi širino slike kontejnerju */
+            height: auto;  /* Ohranimo razmerje stranic slike */
             margin-bottom: 20px;
+            border-radius: 8px;  /* Rahlo zaobljeni robovi za boljši izgled */
         }
         .create-account-container input {
             width: calc(100% - 22px);
@@ -57,7 +59,7 @@
 </head>
 <body>
     <div class="create-account-container">
-        <img src="/static/nba-logo.jpg" alt="NBA Logo">
+        <img src="/static/Images/nba-logo.jpg" alt="NBA Logo">
         <h2>Ustvari Račun</h2>
         <form action="/registracija" method="post">
             <input type="text" name="username" placeholder="Uporabniško ime" required>

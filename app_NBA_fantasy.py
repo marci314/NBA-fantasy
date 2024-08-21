@@ -43,11 +43,6 @@ def cookie_required(f):
 def domaca_stran():
     return template('domaca_stran.html')
 
-
-@app.route('/static/<filename:path>')
-def static(filename):
-    return static_file(filename, root='Presentation/static')
-
 @app.get('/prijava')
 def prijava_get():
     return template("prijava.html", napaka="")
@@ -248,9 +243,17 @@ def dodaj_trenerja(coach_id):
     f_ekipa_id = cur.fetchone()[0]
     
     rezultat = repo.dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
-    coaches = repo.get_all_coaches()
+    
     if "Ekipa že ima trenerja." in rezultat:
+        # Ponovno pridobi trenerje iz baze podatkov za prikaz v predlogi
+        cur.execute("""
+            SELECT trener.trener_id, trener.ime, trener.rojstvo, COALESCE(trenerji_ekipe.ekipa_id, 'Ni ekipe') AS ekipa_id
+            FROM trener
+            LEFT JOIN trenerji_ekipe ON trenerji_ekipe.trener_id = trener.trener_id
+        """)
+        coaches = cur.fetchall()
         return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)  # Prikaz napake v predlogi
+    
     return redirect('/spreminjaj_trenerja')
 
 
@@ -301,103 +304,204 @@ def spored_tekem():
 
 @app.get('/tekma/<id_tekma>')
 def prikazi_tekmo(id_tekma):
-    # Fetch home team players and coach
-    cur.execute("""
-        SELECT i.igralec_id, i.ime, i.priimek, i.pozicija, i.visina, i.rojstvo
-        FROM igralec i
-        JOIN fantasy_ekipa_igralci fei ON i.igralec_id = fei.igralec_id
-        JOIN tekma t ON fei.f_ekipa_id = t.domaca_ekipa::integer
-        WHERE t.id_tekma = %s
-    """, (id_tekma,))
-    domaci_igralci = cur.fetchall()
+    try:
+        # Pridobimo domačo in gostujočo ekipo
+        cur.execute("""
+            SELECT domaca_ekipa, gostujoca_ekipa
+            FROM tekma
+            WHERE id_tekma = %s
+        """, (id_tekma,))
+        tekma = cur.fetchone()
 
-    cur.execute("""
-        SELECT tr.trener_id, tr.ime, tr.rojstvo
-        FROM trener tr
-        JOIN fantasy_ekipa_trener fet ON tr.trener_id = fet.trener_id
-        JOIN tekma t ON fet.f_ekipa_id = t.domaca_ekipa::integer
-        WHERE t.id_tekma = %s
-    """, (id_tekma,))
-    domaci_trener = cur.fetchone()
+        domaca_ekipa = tekma[0]
+        gostujoca_ekipa = tekma[1]
 
-    # Fetch away team players and coach
-    cur.execute("""
-        SELECT i.igralec_id, i.ime, i.priimek, i.pozicija, i.visina, i.rojstvo
-        FROM igralec i
-        JOIN fantasy_ekipa_igralci fei ON i.igralec_id = fei.igralec_id
-        JOIN tekma t ON fei.f_ekipa_id = t.gostujoca_ekipa::integer
-        WHERE t.id_tekma = %s
-    """, (id_tekma,))
-    gostujoci_igralci = cur.fetchall()
+        # Pridobimo igralce domače ekipe
+        cur.execute("""
+            SELECT i.igralec_id, i.ime, i.pozicija, i.visina, i.rojstvo
+            FROM igralec i
+            JOIN igralci_ekipe ie ON i.igralec_id = ie.id_igralca
+            WHERE ie.id_ekipa = %s
+        """, (domaca_ekipa,))
+        domaci_igralci = cur.fetchall()
 
-    cur.execute("""
-        SELECT tr.trener_id, tr.ime, tr.rojstvo
-        FROM trener tr
-        JOIN fantasy_ekipa_trener fet ON tr.trener_id = fet.trener_id
-        JOIN tekma t ON fet.f_ekipa_id = t.gostujoca_ekipa::integer
-        WHERE t.id_tekma = %s
-    """, (id_tekma,))
-    gostujoci_trener = cur.fetchone()
+        # Pridobimo trenerja domače ekipe
+        cur.execute("""
+            SELECT tr.trener_id, tr.ime, tr.rojstvo
+            FROM trener tr
+            JOIN trenerji_ekipe te ON tr.trener_id = te.trener_id
+            WHERE te.ekipa_id = %s
+        """, (domaca_ekipa,))
+        domaci_trener = cur.fetchone()
 
-    return template('tekma.html', 
-                    domaci_igralci=domaci_igralci, 
-                    domaci_trener=domaci_trener, 
-                    gostujoci_igralci=gostujoci_igralci, 
-                    gostujoci_trener=gostujoci_trener)
+        # Pridobimo igralce gostujoče ekipe
+        cur.execute("""
+            SELECT i.igralec_id, i.ime, i.pozicija, i.visina, i.rojstvo
+            FROM igralec i
+            JOIN igralci_ekipe ie ON i.igralec_id = ie.id_igralca
+            WHERE ie.id_ekipa = %s
+        """, (gostujoca_ekipa,))
+        gostujoci_igralci = cur.fetchall()
 
+        # Pridobimo trenerja gostujoče ekipe
+        cur.execute("""
+            SELECT tr.trener_id, tr.ime, tr.rojstvo
+            FROM trener tr
+            JOIN trenerji_ekipe te ON tr.trener_id = te.trener_id
+            WHERE te.ekipa_id = %s
+        """, (gostujoca_ekipa,))
+        gostujoci_trener = cur.fetchone()
 
+        return template('tekma.html',
+                        domaci_igralci=domaci_igralci,
+                        domaci_trener=domaci_trener,
+                        gostujoci_igralci=gostujoci_igralci,
+                        gostujoci_trener=gostujoci_trener,
+                        error=None)
+
+    except Exception as e:
+        return template('tekma.html',
+                        domaci_igralci=[],
+                        domaci_trener=None,
+                        gostujoci_igralci=[],
+                        gostujoci_trener=None,
+                        error=str(e))
 
 @app.get('/simuliraj_tekme')
 def prikazi_izbor_tekem():
-    cur.execute("SELECT DISTINCT datum FROM tekma ORDER BY datum ASC")
-    dates = cur.fetchall()
-    dates = [row[0] for row in dates]  # Pretvorimo v seznam datumov
-    return template('izberi_okno.html', dates=dates)
+    try:
+        cur.execute("SELECT DISTINCT datum FROM tekma ORDER BY datum ASC")
+        dates = cur.fetchall()
+        dates = [row[0] for row in dates]  # Pretvorimo v seznam datumov
+        return template('izberi_okno.html', dates=dates, error=None)  # Dodaj error=None, če ni napake
+    except Exception as e:
+        return template('izberi_okno.html', dates=[], error=str(e))  # Če pride do napake, posreduj napako
+
+
+def pridobi_tekme_v_casovnem_oknu(conn, zacetni_datum, koncni_datum):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT id_tekma 
+            FROM tekma 
+            WHERE datum BETWEEN %s AND %s
+        """, (zacetni_datum, koncni_datum))
+        tekme = cur.fetchall()
+    return [tekma[0] for tekma in tekme]  # Seznam ID-jev tekem
+
+
+def pridobi_podatke_o_tekmi(conn, id_tekem):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT * 
+            FROM podatki_o_tekmi 
+            WHERE id_tekme = ANY(%s)
+        """, (id_tekem,))
+        podatki = cur.fetchall()
+    return podatki
+
+
+def posodobi_tocke_za_fantasy_ekipe(conn, id_tekem, cur):
+    """
+    Posodobi točke za vse fantasy ekipe na podlagi tekem, ki so se zgodile v izbranem časovnem oknu.
+    """
+    # Pridobi vse fantasy ekipe
+    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa")
+    ekipe = cur.fetchall()
+
+    for ekipa in ekipe:
+        f_ekipa_id = ekipa[0]
+        
+        # Pridobi igralce iz te fantasy ekipe
+        cur.execute("""
+            SELECT igralec_id 
+            FROM fantasy_ekipa_igralci 
+            WHERE f_ekipa_id = %s
+        """, (f_ekipa_id,))
+        igralci = cur.fetchall()
+
+        if not igralci:
+            continue
+        
+        skupne_tocke = 0
+        
+        # Pridobi podatke o tekmah za te igralce
+        cur.execute("""
+            SELECT * 
+            FROM podatki_o_tekmi 
+            WHERE id_igralca = ANY(%s) 
+            AND id_tekme = ANY(%s)
+        """, ([igralec[0] for igralec in igralci], id_tekem))
+        podatki_o_tekmi = cur.fetchall()
+        
+        # Izračunaj točke za vsako tekmo
+        for podatki in podatki_o_tekmi:
+            tocke = izracunaj_tocke(podatki)
+            skupne_tocke += tocke
+        
+        # Posodobi točke v bazi za to fantasy ekipo
+        cur.execute("""
+            UPDATE fantasy_ekipa 
+            SET tocke = tocke + %s 
+            WHERE f_ekipa_id = %s
+        """, (skupne_tocke, f_ekipa_id))
+
+
+def simuliraj_tekme(conn, zacetni_datum, koncni_datum):
+    """
+    Simulira tekme v izbranem časovnem oknu in posodobi točke za fantasy ekipe.
+    """
+    with conn.cursor() as cur:
+        # Pridobi ID-je tekem, ki so se zgodile v izbranem časovnem oknu
+        cur.execute("""
+            SELECT id_tekma 
+            FROM tekma 
+            WHERE datum BETWEEN %s AND %s
+        """, (zacetni_datum, koncni_datum))
+        id_tekem = [row[0] for row in cur.fetchall()]
+
+        if not id_tekem:
+            raise Exception("V izbranem časovnem oknu ni tekem.")
+
+        # Posodobi točke za vse fantasy ekipe na podlagi teh tekem
+        posodobi_tocke_za_fantasy_ekipe(conn, id_tekem, cur)
+
+        conn.commit()
+
+def izracunaj_tocke(podatki):
+    """
+    Izračuna fantasy točke za enega igralca na podlagi podatkov o tekmi.
+    Predvideva, da je 'podatki' tuple, zato se do elementov dostopa prek indeksov.
+    """
+    tocke = (5 * podatki[10] +  
+             podatki[8] * (0.2 + podatki[2]) +  
+             podatki[6] +  
+             podatki[7] +  
+             2 * podatki[4] +  
+             2 * podatki[3] -  
+             2 * podatki[5])  
+    return math.floor(tocke)
 
 
 @app.post('/simuliraj_tekme')
-def simuliraj_tekme():
-    uporabnisko_ime = request.get_cookie("uporabnisko_ime")
-    if not uporabnisko_ime:
-        return redirect('/prijava')
+def simuliraj_tekme_route():
+    zacetni_datum = request.forms.get('start_date')
+    koncni_datum = request.forms.get('end_date')
     
-    # Preberemo datume iz obrazca
-    start_date = request.forms.get('start_date')
-    end_date = request.forms.get('end_date')
+    cur.execute("SELECT DISTINCT datum FROM tekma ORDER BY datum ASC")
+    dates = cur.fetchall()
+    dates = [row[0] for row in dates]
+
+    if not zacetni_datum or not koncni_datum:
+        return template('izberi_okno.html', error="Prosim izberi datume.", dates=dates)
     
-    # Pridobimo uporabnika in njegovo ekipo
-    user = auth_service.klice_uporabnika(uporabnisko_ime)
-    cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
-    f_ekipa_id = cur.fetchone()[0]
+    if koncni_datum < zacetni_datum:
+        return template('izberi_okno.html', error="Končni datum mora biti enak ali večji od začetnega datuma.", dates=dates)
     
-    # Pridobimo vse tekme v izbranem časovnem oknu
-    cur.execute("""
-        SELECT p.*, t.datum
-        FROM podatki_o_tekmi p
-        JOIN tekma t ON p.id_tekme = t.id_tekma
-        WHERE t.datum BETWEEN %s AND %s
-    """, (start_date, end_date))
-    tekme = cur.fetchall()
-
-    # Pridobimo vse igralce v fantasy ekipi
-    cur.execute("SELECT id_igralca FROM fantasy_ekipa_igralci WHERE f_ekipa_id = %s", (f_ekipa_id,))
-    igralci = cur.fetchall()
-    
-    skupne_tocke = 0
-    
-    # Izračunajmo točke za vsakega igralca
-    for tekma in tekme:
-        if tekma['id_igralca'] in [i[0] for i in igralci]:
-            podatki = PodatkiOTekmi(tekma)  # Pretvorba v objekt, če je potreben
-            tocke = izracunaj_tocke(podatki)
-            skupne_tocke += tocke
-
-    # Posodobimo točke ekipe
-    cur.execute("UPDATE fantasy_ekipa SET tocke = tocke + %s WHERE f_ekipa_id = %s", (skupne_tocke, f_ekipa_id))
-    auth_service.conn.commit()
-
-    return redirect('/homescreen')
-
-
+    try:
+        simuliraj_tekme(conn, zacetni_datum, koncni_datum)
+        return redirect('/homescreen')
+    except Exception as e:
+        # V primeru napake vrnemo datume in napako
+        return template('izberi_okno.html', error=str(e), dates=dates)
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

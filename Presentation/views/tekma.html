@@ -30,6 +30,17 @@
             color: #333;
         }
 
+        .team-section {
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .team-section h2 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -44,6 +55,11 @@
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 20px;
         }
 
         button {
@@ -63,69 +79,83 @@
 </head>
 <body>
     <div class="container">
-        <h1>Podatki o tekmi</h1>
-        
-        <h2>Domača Ekipa</h2>
-        <h3>Igralci</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Igralca</th>
-                    <th>Ime</th>
-                    <th>Pozicija</th>
-                    <th>Višina</th>
-                    <th>Rojstvo</th>
-                </tr>
-            </thead>
-            <tbody>
-                % for player in domaci_igralci:
-                <tr>
-                    <td>{{player.igralec_id}}</td>
-                    <td>{{player.ime}}</td>
-                    <td>{{player.pozicija}}</td>
-                    <td>{{player.visina}}</td>
-                    <td>{{player.rojstvo}}</td>
-                </tr>
-                % end
-            </tbody>
-        </table>
-        <h3>Trener</h3>
-        % if domaci_trener:
-        <p>{{domaci_trener.ime}} {{domaci_trener.rojstvo}}</p>
-        % else:
-        <p>Trener ni določen</p>
+        <h1>Podrobnosti Tekme</h1>
+
+        % if error:
+        <p class="error">{{error}}</p>
         % end
 
-        <h2>Gostujoča Ekipa</h2>
-        <h3>Igralci</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Igralca</th>
-                    <th>Ime</th>
-                    <th>Pozicija</th>
-                    <th>Višina</th>
-                    <th>Rojstvo</th>
-                </tr>
-            </thead>
-            <tbody>
-                % for player in gostujoci_igralci:
-                <tr>
-                    <td>{{player.igralec_id}}</td>
-                    <td>{{player.ime}}</td>
-                    <td>{{player.pozicija}}</td>
-                    <td>{{player.visina}}</td>
-                    <td>{{player.rojstvo}}</td>
-                </tr>
-                % end
-            </tbody>
-        </table>
-        <h3>Trener</h3>
-        % if gostujoci_trener:
-        <p>{{gostujoci_trener.ime}} {{gostujoci_trener.rojstvo}}</p>
-        % else:
-        <p>Trener ni določen</p>
-        % end
+        <div class="team-section">
+            <h2>Domača Ekipa</h2>
+            % if domaci_trener:
+            <p>Trener: {{domaci_trener[1]}}</p>
+            % else:
+            <p class="error">Trener ni na voljo.</p>
+            % end
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ime</th>
+                        <th>Pozicija</th>
+                        <th>Višina (cm)</th>
+                        <th>Datum Rojstva</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % if domaci_igralci:
+                        % for igralec in domaci_igralci:
+                        <tr>
+                            <td>{{igralec[1]}}</td>
+                            <td>{{igralec[2]}}</td>
+                            <td>{{igralec[3]}}</td>
+                            <td>{{igralec[4]}}</td>
+                        </tr>
+                        % end
+                    % else:
+                    <tr>
+                        <td colspan="4">Ni igralcev v tej ekipi.</td>
+                    </tr>
+                    % end
+                </tbody>
+            </table>
+        </div>
+
+        <div class="team-section">
+            <h2>Gostujoča Ekipa</h2>
+            % if gostujoci_trener:
+            <p>Trener: {{gostujoci_trener[1]}}</p>
+            % else:
+            <p class="error">Trener ni na voljo.</p>
+            % end
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ime</th>
+                        <th>Pozicija</th>
+                        <th>Višina (cm)</th>
+                        <th>Datum Rojstva</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % if gostujoci_igralci:
+                        % for igralec in gostujoci_igralci:
+                        <tr>
+                            <td>{{igralec[1]}}</td>
+                            <td>{{igralec[2]}}</td>
+                            <td>{{igralec[3]}}</td>
+                            <td>{{igralec[4]}}</td>
+                        </tr>
+                        % end
+                    % else:
+                    <tr>
+                        <td colspan="4">Ni igralcev v tej ekipi.</td>
+                    </tr>
+                    % end
+                </tbody>
+            </table>
+        </div>
 
         <button onclick="window.location.href='/spored_tekem'">Nazaj</button>
     </div>
