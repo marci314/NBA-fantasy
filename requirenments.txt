@@ -14,3 +14,17 @@ io
 basketball_reference_web_scraper
 timedelta
 hashlib
+
+psycopg2.extensions
+psycopg2.extras
+os
+typing
+warnings
+dataclasses
+functools
+bcrypt
+__future__
+tempfile
+traceback
+inspect
+unicodedata
