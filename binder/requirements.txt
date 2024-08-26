@@ -24,7 +24,6 @@ warnings
 dataclasses
 functools
 bcrypt
-__future__
 tempfile
 traceback
 inspect
