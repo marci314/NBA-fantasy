@@ -12,7 +12,7 @@ Statistične podatke o tekmah in igralcih bova pridobila s spletne strani [baske
 
 ### ER diagram
 
-![ER diagram](er_diagram.jpg)
+![ER diagram](Presentation/static/Images/opber3.png)
 
 
 
