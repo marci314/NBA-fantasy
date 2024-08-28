@@ -35,7 +35,7 @@ def cookie_required(f):
         uporabnisko_ime = request.get_cookie("uporabnisko_ime")
         if uporabnisko_ime:
             return f(*args, **kwargs)
-        return redirect('/prijava')
+        return redirect(url('prijava_get'))
     return decorated
 
 #--------------------------DOMACA STRAN------------------------------------------------------------------------
@@ -65,12 +65,12 @@ def prijava_post():
         return template('prijava.html', napaka="Nepravilno uporabniško ime ali geslo.")
 
     response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
-    return redirect('/homescreen')
+    return redirect(url('domov'))
 
 @app.get('/odjava')
 def odjava():
     response.delete_cookie("uporabnisko_ime")
-    return redirect('/')
+    return redirect(url('domaca_stran'))
 
 @app.get('/registracija')
 def registracija_get():
@@ -88,7 +88,7 @@ def registracija_post():
         
         user_dto = auth_service.dodaj_uporabnika(uporabnisko_ime, geslo)
         dodaj_ekipo_ob_registraciji(user_dto.uporabnik_id, teamname)
-        return redirect('/prijava')
+        return redirect(url('prijava_get'))
     except Exception as e:
         return template('prijava.html', napaka=f"Račun je ustvarjen, prijavite se!")
 
@@ -151,7 +151,7 @@ def odstrani_igralca(player_id):
     f_ekipa_id = cur.fetchone()[0]
 
     repo.odstrani_igralca_iz_fantasy_ekipe(f_ekipa_id, player_id)
-    return redirect('/homescreen')
+    return redirect(url('domov'))
 
 @app.get('/odstrani_trenerja/<coach_id>')
 @cookie_required
@@ -164,7 +164,7 @@ def odstrani_trenerja(coach_id):
     f_ekipa_id = cur.fetchone()[0]
 
     repo.odstrani_trenerja_iz_fantasy_ekipe(f_ekipa_id, coach_id)
-    return redirect('/homescreen')
+    return redirect(url('domov'))
 
 @app.get('/lestvica')
 @cookie_required
@@ -207,7 +207,7 @@ def spreminjaj_igralce():
 def dodaj_igralca():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
-        return redirect('/prijava')
+        return redirect(url('prijava_get'))
 
     player_id = request.forms.get('player')
     if not player_id:
@@ -223,7 +223,7 @@ def dodaj_igralca():
     players = repo.get_all_players()
     if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
         return template('spreminjaj_igralce.html', players=players, error=rezultat)  # Prikaz napake v predlogi
-    return redirect('/spreminjaj_igralce')
+    return redirect(url('spreminjaj_igralce'))
 
 
 @app.get('/spreminjaj_trenerja')
@@ -240,7 +240,7 @@ def spreminjaj_trenerja():
 def dodaj_trenerja(coach_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
-        return redirect('/prijava')
+        return redirect(url('prijava_get'))
     
     user = auth_service.klice_uporabnika(uporabnisko_ime)
     cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
@@ -258,7 +258,7 @@ def dodaj_trenerja(coach_id):
         coaches = cur.fetchall()
         return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)  # Prikaz napake v predlogi
     
-    return redirect('/spreminjaj_trenerja')
+    return redirect(url('spreminjaj_trenerja'))
 
 
 @app.get('/ekipa/<ekipa_id>')
@@ -503,7 +503,7 @@ def simuliraj_tekme_route():
     
     try:
         simuliraj_tekme(conn, zacetni_datum, koncni_datum)
-        return redirect('/homescreen')
+        return redirect(url('domov'))
     except Exception as e:
         # V primeru napake vrnemo datume in napako
         return template('izberi_okno.html', error=str(e), dates=dates)
@@ -517,7 +517,7 @@ def ponastavi_tocke():
     except Exception:
         # Ne izpiše napake, ampak vseeno preusmeri
         pass
-    return redirect('/lestvica') 
+    return redirect(url('prikazi_lestvico')) 
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

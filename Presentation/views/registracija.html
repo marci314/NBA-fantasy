@@ -61,7 +61,7 @@
     <div class="create-account-container">
         <img src="/static/Images/nba-logo.jpg" alt="NBA Logo">
         <h2>Ustvari Račun</h2>
-        <form action="/registracija" method="post">
+        <form action="{{url('registracija_post')}}" method="post">
             <input type="text" name="username" placeholder="Uporabniško ime" required>
             <input type="password" name="password" placeholder="Geslo" required>
             <input type="text" name="teamname" placeholder="Ime ekipe" required>

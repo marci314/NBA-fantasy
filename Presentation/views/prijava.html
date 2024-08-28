@@ -76,7 +76,7 @@
             <img src="/static/Images/nba-logo.jpg" alt="NBA Fantasy League Logo">
         </div>
         <h1>Prijava</h1>
-        <form action="/prijava" method="post">
+        <form action="{{url('prijava_post')}}" method="post">
             <div class="input-group">
                 <label for="username">Uporabniško ime:</label>
                 <input type="text" id="username" name="username" required>

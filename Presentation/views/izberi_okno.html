@@ -79,7 +79,7 @@
         % else:
         <p class="error"></p>
         % end
-        <form action="/simuliraj_tekme" method="post">
+        <form action="{{url('prikazi_izbor_tekem')}}" method="post">
             <div class="input-container">
                 <label for="start-date">Začetni datum:</label>
                 <select id="start-date" name="start_date" required>
