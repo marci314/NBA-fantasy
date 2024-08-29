@@ -196,9 +196,11 @@ def izberi_datum():
 @app.get('/spreminjaj_igralce')
 def spreminjaj_igralce():
     cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni ekipe') AS id_ekipa
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, 
+               COALESCE(ekipa.ekipa_ime, 'Ni ekipe') AS ekipa_ime
         FROM igralec
         LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
+        LEFT JOIN ekipa ON ekipa.ekipa_id = igralci_ekipe.id_ekipa
     """)
     players = cur.fetchall()
     return template('spreminjaj_igralce.html', players=players, error=None)
@@ -208,19 +210,26 @@ def dodaj_igralca():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
         return redirect('/prijava')
-
-    player_id = request.forms.get('player')
-    if not player_id:
-        players = repo.get_all_players()
-        return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
-
     user = auth_service.klice_uporabnika(uporabnisko_ime)
+
     with auth_service.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
         cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
         f_ekipa_id = cur.fetchone()[0]
 
+        cur.execute("""
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, 
+               COALESCE(ekipa.ekipa_ime, 'Ni ekipe') AS ekipa_ime
+        FROM igralec
+        LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
+        LEFT JOIN ekipa ON ekipa.ekipa_id = igralci_ekipe.id_ekipa
+        """)
+        players = cur.fetchall()
+
+    player_id = request.forms.get('player')
+    if not player_id:
+        return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
+
     rezultat = repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
-    players = repo.get_all_players()
     if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
         return template('spreminjaj_igralce.html', players=players, error=rezultat)  # Prikaz napake v predlogi
     return redirect('/spreminjaj_igralce')
@@ -518,6 +527,10 @@ def ponastavi_tocke():
         # Ne izpiše napake, ampak vseeno preusmeri
         pass
     return redirect('/lestvica') 
+
+@app.get('/pravila')
+def pravila():
+    return template('pravila.html')
 
 if __name__ == '__main__':
     run(app, host='localhost', port=8080, debug=True)

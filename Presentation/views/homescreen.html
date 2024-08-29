@@ -54,7 +54,7 @@
             flex-direction: column;
             align-items: center;
             position: fixed;
-            top: 50px; /* Align with the header */
+            top: 10px; /* Align with the header */
             right: 0;
             height: calc(100% - 50px);
             box-shadow: -2px 0 5px rgba(0,0,0,0.1);
@@ -81,8 +81,8 @@
         .sidebar img {
             width: 100%;
             margin-top: auto;
+            object-fit: contain; 
         }
-
         main {
             flex-grow: 1;
             padding: 20px;
@@ -127,6 +127,7 @@
             <button id="remove-coach">Odstrani trenerja</button>
             <button onclick="window.location.href='/lestvica'">Poglej lestvico</button>
             <button onclick="window.location.href='/spored_tekem'">Spored tekem</button>
+            <button onclick="window.location.href='/pravila'">Pravila</button>
             <img src="/static/Images/nba-logo.jpg" alt="Logo">
         </div>
         <main>
@@ -146,7 +147,7 @@
                     % if players:
                         % for player in players:
                         <tr>
-                            <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
+                            <td><input type="radio" name="player" value="{{player[0]}}"></td>
                             <td>{{player[1]}}</td>
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
@@ -174,7 +175,7 @@
                 <tbody>
                     % if coach:
                         <tr>
-                            <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
+                            <td><input type="radio" name="coach" value="{{coach[0]}}"></td>
                             <td>{{coach[1]}}</td>
                             <td>{{coach[2]}}</td>
                             <td>{{coach[3]}}</td> 
