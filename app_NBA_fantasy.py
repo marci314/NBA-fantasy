@@ -1,6 +1,5 @@
 from Presentation.bottleext import *
 import psycopg2, psycopg2.extras
-import os
 from functools import wraps
 from Services.auth_service import AuthService
 from Data.database import *
@@ -8,10 +7,13 @@ from Data.auth_public import host, dbname, user, password
 import hashlib
 from typing import List, Dict, Union
 
-TEMPLATE_PATH.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'Presentation/views')))
+import os
 
-# Inicializacija aplikacije in povezave z bazo
-app = Bottle()
+SERVER_PORT = os.environ.get('BOTTLE_PORT', 8080)
+RELOADER = os.environ.get('BOTTLE_RELOADER', True)
+
+
+TEMPLATE_PATH.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'Presentation/views')))
 
 # Povezava z bazo podatkov
 conn = psycopg2.connect(
@@ -39,19 +41,19 @@ def cookie_required(f):
     return decorated
 
 #--------------------------DOMACA STRAN------------------------------------------------------------------------
-@app.get('/')
+@get('/')
 def domaca_stran():
     return template('domaca_stran.html')
 
-@app.route('/static/<filename:path>')
+@route('/static/<filename:path>')
 def static_files(filename):
     return static_file(filename, root='Presentation/static')
 
-@app.get('/prijava')
+@get('/prijava')
 def prijava_get():
     return template("prijava.html", napaka="")
 
-@app.post('/prijava')
+@post('/prijava')
 def prijava_post():
     uporabnisko_ime = request.forms.get('username')
     geslo = request.forms.get('password')
@@ -67,16 +69,16 @@ def prijava_post():
     response.set_cookie("uporabnisko_ime", uporabnisko_ime, path="/")
     return redirect(url('domov'))
 
-@app.get('/odjava')
+@get('/odjava')
 def odjava():
     response.delete_cookie("uporabnisko_ime")
     return redirect(url('domaca_stran'))
 
-@app.get('/registracija')
+@get('/registracija')
 def registracija_get():
     return template('registracija.html', napaka="")
 
-@app.post('/registracija')
+@post('/registracija')
 def registracija_post():
     uporabnisko_ime = request.forms.get('username')
     geslo = request.forms.get('password')
@@ -103,7 +105,7 @@ def dodaj_ekipo_ob_registraciji(user_id, teamname):
         auth_service.conn.rollback()
         raise e
 
-@app.get('/homescreen')
+@get('/homescreen')
 @cookie_required
 def domov():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
@@ -140,7 +142,7 @@ def domov():
 
     return template('homescreen.html', players=players, coach=coach)
 
-@app.get('/odstrani_igralca/<player_id>')
+@get('/odstrani_igralca/<player_id>')
 @cookie_required
 def odstrani_igralca(player_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
@@ -153,7 +155,7 @@ def odstrani_igralca(player_id):
     repo.odstrani_igralca_iz_fantasy_ekipe(f_ekipa_id, player_id)
     return redirect(url('domov'))
 
-@app.get('/odstrani_trenerja/<coach_id>')
+@get('/odstrani_trenerja/<coach_id>')
 @cookie_required
 def odstrani_trenerja(coach_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
@@ -166,7 +168,7 @@ def odstrani_trenerja(coach_id):
     repo.odstrani_trenerja_iz_fantasy_ekipe(f_ekipa_id, coach_id)
     return redirect(url('domov'))
 
-@app.get('/lestvica')
+@get('/lestvica')
 @cookie_required
 def prikazi_lestvico():
     cur = auth_service.cur
@@ -181,7 +183,7 @@ def prikazi_lestvico():
     return template('lestvica.html', teams=teams)
 
 
-@app.route('/izberi_datum', method=['GET', 'POST'])
+@route('/izberi_datum', method=['GET', 'POST'])
 def izberi_datum():
     if request.method == 'POST':
         izbrani_datum = request.forms.get('datum')
@@ -193,7 +195,7 @@ def izberi_datum():
     
     return template('izberi_datum_form')
 
-@app.get('/spreminjaj_igralce')
+@get('/spreminjaj_igralce')
 def spreminjaj_igralce():
     cur.execute("""
         SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni ekipe') AS id_ekipa
@@ -203,7 +205,7 @@ def spreminjaj_igralce():
     players = cur.fetchall()
     return template('spreminjaj_igralce.html', players=players, error=None)
 
-@app.post('/dodaj_igralca')
+@post('/dodaj_igralca')
 def dodaj_igralca():
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
@@ -226,7 +228,7 @@ def dodaj_igralca():
     return redirect(url('spreminjaj_igralce'))
 
 
-@app.get('/spreminjaj_trenerja')
+@get('/spreminjaj_trenerja')
 def spreminjaj_trenerja():
     cur.execute("""
         SELECT trener.trener_id, trener.ime, trener.rojstvo, COALESCE(trenerji_ekipe.ekipa_id, 'Ni ekipe') AS ekipa_id
@@ -236,7 +238,7 @@ def spreminjaj_trenerja():
     coaches = cur.fetchall()
     return template('spreminjaj_trenerja.html', coaches=coaches, error=None)
 
-@app.get('/dodaj_trenerja/<coach_id>')
+@get('/dodaj_trenerja/<coach_id>')
 def dodaj_trenerja(coach_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
@@ -261,7 +263,7 @@ def dodaj_trenerja(coach_id):
     return redirect(url('spreminjaj_trenerja'))
 
 
-@app.get('/ekipa/<ekipa_id>')
+@get('/ekipa/<ekipa_id>')
 def prikazi_ekipo(ekipa_id):
     cur = auth_service.cur
 
@@ -300,13 +302,13 @@ def prikazi_ekipo(ekipa_id):
 
     return template('ekipa.html', team=team, players=players, coach=coach, error=error)
 
-@app.get('/spored_tekem')
+@get('/spored_tekem')
 def spored_tekem():
     cur.execute("SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum FROM tekma")
     matches = cur.fetchall()
     return template('spored_tekem.html', matches=matches)
 
-@app.get('/tekma/<id_tekma>')
+@get('/tekma/<id_tekma>')
 def prikazi_tekmo(id_tekma):
     try:
         # Pridobimo domačo in gostujočo ekipo
@@ -371,7 +373,7 @@ def prikazi_tekmo(id_tekma):
                         gostujoci_trener=None,
                         error=str(e))
 
-@app.get('/simuliraj_tekme')
+@get('/simuliraj_tekme')
 def prikazi_izbor_tekem():
     try:
         cur.execute("SELECT DISTINCT datum FROM tekma ORDER BY datum ASC")
@@ -486,7 +488,7 @@ def izracunaj_tocke(podatki):
     return math.floor(tocke)
 
 
-@app.post('/simuliraj_tekme')
+@post('/simuliraj_tekme')
 def simuliraj_tekme_route():
     zacetni_datum = request.forms.get('start_date')
     koncni_datum = request.forms.get('end_date')
@@ -508,7 +510,7 @@ def simuliraj_tekme_route():
         # V primeru napake vrnemo datume in napako
         return template('izberi_okno.html', error=str(e), dates=dates)
     
-@app.get('/ponastavi_tocke')
+@get('/ponastavi_tocke')
 def ponastavi_tocke():
     try:
         # Posodobi vse ekipe, da imajo točke enake 0
@@ -520,4 +522,4 @@ def ponastavi_tocke():
     return redirect(url('prikazi_lestvico')) 
 
 if __name__ == '__main__':
-    run(app, host='localhost', port=8080, debug=True)
+    run(host='localhost', port=SERVER_PORT, reloader=RELOADER)
