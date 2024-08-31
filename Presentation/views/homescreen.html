@@ -204,7 +204,8 @@
         document.getElementById('remove-player').onclick = function() {
             let selectedPlayer = document.querySelector('input[name="player"]:checked');
             if (selectedPlayer) {
-                window.location.href = '/odstrani_igralca/' + selectedPlayer.value;
+                <form method="GET" action="{{url(f'odstrani__igralca{selectedPlayer.value}')}}">
+                </form>
             } else {
                 alert('Prosim izberi igralca.');
             }
@@ -213,7 +214,8 @@
         document.getElementById('remove-coach').onclick = function() {
             let selectedCoach = document.querySelector('input[name="coach"]:checked');
             if (selectedCoach) {
-                window.location.href = '/odstrani_trenerja/' + selectedCoach.value;
+                <form method="GET" action="{{url(f'odstrani__trenerja{selectedCoach.value}')}}">
+                </form>
             } else {
                 alert('Prosim izberi trenerja.');
             }

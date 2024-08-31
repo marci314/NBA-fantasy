@@ -100,7 +100,6 @@
         <p class="error">{{error}}</p>
         % end
 
-        <form action="{{url('dodaj_igralca')}}" method="post">
             <div class="table-container">
                 <table id="player-table">
                     <thead>
@@ -128,14 +127,22 @@
                 </table>
             </div>
             <div class="button-container">
-                <form method="POST" action="{{url('dodaj_igralca')}}">
-                    <button type="submit" class="btn">Dodaj igralca</button>
-                </form>
-            </div>
-        </form>
-        <form method="GET" action="{{url('domaca_stran')}}">
-            <button class="btn">Nazaj</button>
-        </form>
+            <button id="add-player">Dodaj igralca</button>
+            <form method="GET" action="{{url('domov')}}">
+                <button class="btn">Nazaj</button>
+            </form>
+        </div>
     </div>
+    <script>
+        document.getElementById('add-player').onclick = function() {
+            let selectedPlayer = document.querySelector('input[name="player"]:checked');
+            if (selectedPlayer) {
+                <form method="GET" action="{{url(f'dodaj_igralca{selectedPlayer.value}')}}">
+                </form>
+            } else {
+                alert('Prosim izberi igralca.');
+            }
+        };
+    </script>  
 </body>
 </html>

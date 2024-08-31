@@ -122,7 +122,8 @@
         document.getElementById('add-coach').onclick = function() {
             let selectedCoach = document.querySelector('input[name="coach"]:checked');
             if (selectedCoach) {
-                window.location.href = '/dodaj_trenerja/' + selectedCoach.value;
+                <form method="GET" action="{{url(f'dodaj_trenerja{selectedCoach.value}')}}">
+                </form>
             } else {
                 alert('Prosim izberi trenerja.');
             }
