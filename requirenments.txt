@@ -1,13 +1,7 @@
-requests
-pandas
-lxml
+numpy
 bottle
 psycopg2-binary
-psycopg2
+pandas
 dataclasses-json
 bcrypt
-basketball_reference_web_scraper
-timedelta
-psycopg2.extensions
-psycopg2.extras
-__future__
+jupyter-server-proxy

@@ -1,10 +1,16 @@
-from typing import Union
-import bcrypt
+import os
 from datetime import date
-from Data.Modeli import Uporabnik, UporabnikDTO
+from typing import Union
+
+import bcrypt
 import psycopg2
 import psycopg2.extras
-from Data.auth_public import host, dbname, user, password
+
+from Data.auth_public import dbname, host, password, user
+from Data.Modeli import Uporabnik, UporabnikDTO
+
+DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
+
 
 class AuthService:
     def __init__(self):
@@ -18,7 +24,8 @@ class AuthService:
                 database=dbname,
                 host=host,
                 user=user,
-                password=password
+                password=password,
+                port = DB_PORT
             )
             self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
