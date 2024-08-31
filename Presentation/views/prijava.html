@@ -86,8 +86,12 @@
                 <input type="password" id="password" name="password" required>
             </div>
             <div class="btn-container">
-                <button type="submit" class="btn">Prijava</button>
-                <button type="button" class="btn" onclick="window.location.href='/'">Nazaj</button>
+                <form method="POST" action="{{url('prijava_post')}}">
+                    <button type="submit" class="btn">Prijava</button>
+                </form>
+                <form method="GET" action="{{url('domaca_stran')}}">
+                    <button class="btn">Nazaj</button>
+                </form>
             </div>
         </form>
     </div>

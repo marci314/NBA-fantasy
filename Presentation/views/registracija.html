@@ -66,8 +66,12 @@
             <input type="password" name="password" placeholder="Geslo" required>
             <input type="text" name="teamname" placeholder="Ime ekipe" required>
             <div>
-                <button type="submit">Ustvari račun</button>
-                <button type="button" onclick="window.location.href='/'">Nazaj</button>
+                <form method="POST" action="{{url('registracija_post')}}">
+                    <button type="submit" class="btn">Ustvari račun</button>
+                </form>
+                <form method="GET" action="{{url('domaca_stran')}}">
+                    <button class="btn">Nazaj</button>
+                </form>
             </div>
         </form>
         % if napaka:

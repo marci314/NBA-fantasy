@@ -119,7 +119,10 @@
         % else:
         <p>Ekipa ne obstaja.</p>
         % end
-        <button onclick="window.location.href='/lestvica'">Nazaj</button>
+    </form>
+    <form method="GET" action="{{url('prikazi_lestvico')}}">
+        <button class="btn">Nazaj</button>
+    </form>
     </div>
 </body>
 </html>

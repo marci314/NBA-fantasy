@@ -128,10 +128,14 @@
                 </table>
             </div>
             <div class="button-container">
-                <button type="submit">Dodaj igralca</button>
+                <form method="POST" action="{{url('dodaj_igralca')}}">
+                    <button type="submit" class="btn">Dodaj igralca</button>
+                </form>
             </div>
         </form>
-        <button onclick="window.location.href='/homescreen'">Nazaj</button>
+        <form method="GET" action="{{url('domaca_stran')}}">
+            <button class="btn">Nazaj</button>
+        </form>
     </div>
 </body>
 </html>

@@ -98,7 +98,9 @@
             </div>
             <div class="button-container">
                 <button type="submit">Odigraj Tekme</button>
-                <button type="button" onclick="window.location.href='/homescreen'">Nazaj</button>
+                <form method="GET" action="{{url('domov')}}">
+                    <button class="btn">Nazaj</button>
+                </form>
             </div>
         </form>
     </div>

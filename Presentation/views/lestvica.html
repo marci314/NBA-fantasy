@@ -97,8 +97,12 @@
             </tbody>
         </table>
         <div class="button-container">
-            <button onclick="window.location.href='/homescreen'">Nazaj</button>
-            <button onclick="window.location.href='/ponastavi_tocke'">Ponastavi točke</button>
+            <form method="GET" action="{{url('domov')}}">
+                <button class="btn">Nazaj</button>
+            </form>
+            <form method="GET" action="{{url('ponastavi_tocke')}}">
+                <button class="btn">Ponastavi točke</button>
+            </form>
         </div>
     </div>
 </body>
