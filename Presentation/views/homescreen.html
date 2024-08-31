@@ -8,7 +8,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('/static/Images/trophies.jpg') no-repeat center center fixed;
+            background: "{{url('static_files', filename='trophies.jpg')}}" no-repeat center center fixed;
             background-size: cover;
             color: #333;
             display: flex;
@@ -127,7 +127,7 @@
             <button id="remove-coach">Odstrani trenerja</button>
             <button onclick="window.location.href='/lestvica'">Poglej lestvico</button>
             <button onclick="window.location.href='/spored_tekem'">Spored tekem</button>
-            <img src="/static/Images/nba-logo.jpg" alt="Logo">
+            <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         </div>
         <main>
             <h2>Igralci</h2>

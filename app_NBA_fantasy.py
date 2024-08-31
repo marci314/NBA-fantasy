@@ -41,7 +41,7 @@ def domaca_stran():
 
 @route('/static/<filename:path>')
 def static_files(filename):
-    return static_file(filename, root='Presentation/static')
+    return static_file(filename, root='Presentation/static/Images')
 
 @get('/prijava')
 def prijava_get():

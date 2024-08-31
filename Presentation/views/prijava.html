@@ -73,7 +73,7 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="/static/Images/nba-logo.jpg" alt="NBA Fantasy League Logo">
+            <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         </div>
         <h1>Prijava</h1>
         <form action="{{url('prijava_post')}}" method="post">

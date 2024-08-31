@@ -59,7 +59,7 @@
 </head>
 <body>
     <div class="create-account-container">
-        <img src="/static/Images/nba-logo.jpg" alt="NBA Logo">
+        <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         <h2>Ustvari Račun</h2>
         <form action="{{url('registracija_post')}}" method="post">
             <input type="text" name="username" placeholder="Uporabniško ime" required>
