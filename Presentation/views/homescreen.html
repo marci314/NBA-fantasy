@@ -131,12 +131,8 @@
             <form method="GET" action="{{url('spreminjaj_trenerja')}}">
                 <button class="btn">Dodaj trenerja</button>
             </form>
-            <form action="{{url('odstrani_igralca', player_id=player_id)}}" method="GET">
-                <button class="btn">Odstrani_igralca</button>
-            </form>
-            <form action="{{url('odstrani_trenerja', coach_id=coach_id)}}" method="GET">
-                <button class="btn">Odstrani_trenerja</button>
-            </form>
+            <button class="btn" id="remove-player">Odstrani_igralca</button>
+            <button class="btn" id="remove-coach">Odstrani_trenerja</button>
             <form method="GET" action="{{url('prikazi_lestvico')}}">
                 <button class="btn">Poglej lestvico</button>
             </form>
@@ -162,7 +158,7 @@
                     % if players:
                         % for player in players:
                         <tr>
-                            <td><input type="checkbox" name="player" value="{{player[0]}}"></td>
+                            <td><input type="radio" name="player" value="{{player[0]}}"></td>
                             <td>{{player[1]}}</td>
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
@@ -190,7 +186,7 @@
                 <tbody>
                     % if coach:
                         <tr>
-                            <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
+                            <td><input type="radio" name="coach" id = "izbrisi" value="{{coach[0]}}"></td>
                             <td>{{coach[1]}}</td>
                             <td>{{coach[2]}}</td>
                             <td>{{coach[3]}}</td> 
@@ -204,5 +200,24 @@
             </table>
         </main>
     </div>
+    <script>
+        document.getElementById('remove-player').onclick = function() {
+            let selectedPlayer = document.querySelector('input[name="player"]:checked');
+            if (selectedPlayer) {
+                "{{url('odstrani_igralca', selectedPlayer.value)}}"
+            } else {
+                alert('Prosim izberi igralca.');
+            }
+        };
+
+        document.getElementById('remove-coach').onclick = function() {
+            let selectedCoach = document.querySelector('input[name="coach"]:checked');
+            if (selectedCoach) {
+                "{{url('odstrani_trenerja', selectedCoach.value)}}"
+            } else {
+                alert('Prosim izberi trenerja.');
+            }
+        };
+    </script>
 </body>
 </html>
