@@ -90,7 +90,7 @@
                 % for index, team in enumerate(teams, start=1):
                 <tr>
                     <td>{{index}}</td> <!-- Mesto ekipe -->
-                    <td><a href="{{url('prikazi_ekipo', ekipa_id=team[0])}}"></a>{{team[1]}}</td>
+                    <td><a href="{{url('prikazi_ekipo', team[0])}}"></a>{{team[1]}}</td>
                     <td>{{team[2]}}</td>
                 </tr>
                 % end
