@@ -131,8 +131,12 @@
             <form method="GET" action="{{url('spreminjaj_trenerja')}}">
                 <button class="btn">Dodaj trenerja</button>
             </form>
-            <button id="remove-player">Odstrani igralca</button>
-            <button id="remove-coach">Odstrani trenerja</button>
+            <form action="{{url('odstrani_igralca', player_id=player_id)}}" method="POST">
+                <button id="remove-player" type="submit">Odstrani_igralca</button>
+            </form>
+            <form action="{{url('odstrani_trenerja', coach_id=coach_id)}}" method="POST">
+                <button id="remove-coach" type="submit">Odstrani_trenerja</button>
+            </form>
             <form method="GET" action="{{url('prikazi_lestvico')}}">
                 <button class="btn">Poglej lestvico</button>
             </form>
@@ -200,23 +204,5 @@
             </table>
         </main>
     </div>
-    <script>
-        document.getElementById('remove-player').onclick = function() {
-            let selectedPlayer = document.querySelector('input[name="player"]:checked');
-            if (selectedPlayer) {
-                "{{url('odstrani_igralca', player_id=selectedPlayer.value)}}"
-            } else {
-                alert('Prosim izberi igralca.');
-            }
-        };
-        document.getElementById('remove-coach').onclick = function() {
-            let selectedCoach = document.querySelector('input[name="coach"]:checked');
-            if (selectedCoach) {
-                "{{url('odstrani_trenerja', coach_id=selectedCoach.value)}}"
-            } else {
-                alert('Prosim izberi trenerja.');
-            }
-        };
-    </script>
 </body>
 </html>
