@@ -104,7 +104,11 @@
                 <tbody>
                     % for coach in coaches:
                     <tr>
-                        <td><input type="checkbox" name="coach" value="{{coach[0]}}"></td>
+                        <td>
+                            <form action="{{url('dodaj_trenerja', coach_id=coach[0])}}" method="post">
+                                <button class="btn">Dodaj</button>
+                            </form>
+                            </td>
                         <td>{{coach[1]}}</td>
                         <td>{{coach[2]}}</td>
                         <td>{{coach[3]}}</td> 
@@ -113,21 +117,9 @@
                 </tbody>
             </table>
         </div>
-        <button id="add-coach">Dodaj trenerja</button>
         <form method="GET" action="{{url('domov')}}">
             <button class="btn">Nazaj</button>
         </form>
     </div>
-    <script>
-        document.getElementById('add-coach').onclick = function() {
-            let selectedCoach = document.querySelector('input[name="coach"]:checked');
-            if (selectedCoach) {
-                <form method="GET" action="{{url(f'dodaj_trenerja{selectedCoach.value}')}}">
-                </form>
-            } else {
-                alert('Prosim izberi trenerja.');
-            }
-        };
-    </script>
 </body>
 </html>

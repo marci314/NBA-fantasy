@@ -98,7 +98,7 @@
                         <td>{{match['domaca_ekipa']}}</td>
                         <td>{{match['gostujoca_ekipa']}}</td>
                         <td>{{match['datum']}}</td>
-                        <td><a href="{{url(f'prikazi_tekmo{match['id_tekma']}')}}">Več o tekmi</a></td>
+                        <td><a href="{{url('prikazi_tekmo', match['id_tekma'])}}">Več o tekmi</a></td>
                         
                     </tr>
                     % end

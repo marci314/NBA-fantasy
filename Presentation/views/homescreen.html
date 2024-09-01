@@ -157,12 +157,12 @@
                         % for player in players:
                         <tr>
                             <td>
-                            <form action="{{url('odstrani_igralca', player_id=player[0])}}" method="get">
+                            <form action="{{url('odstrani_igralca', player_id=player[0])}}" method="post">
                                 <button type="submit" class="btn">Odstrani</button>
                             </form>
                             </td>
                             <td><input type="radio" name="player" value="{{player[0]}}"></td>
-                            <td>{{player[1]}}</td>
+                            <td>{{player[1]}}</td>$ git reset --hard 0ad5a7a6
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
                             <td>{{player[4]}}</td>
