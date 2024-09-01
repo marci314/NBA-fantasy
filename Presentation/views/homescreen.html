@@ -204,16 +204,15 @@
         document.getElementById('remove-player').onclick = function() {
             let selectedPlayer = document.querySelector('input[name="player"]:checked');
             if (selectedPlayer) {
-                window.location.href = '/odstrani_igralca/' + selectedPlayer.value;
+                "{{url('odstrani_igralca', player_id=selectedPlayer.value)}}"
             } else {
                 alert('Prosim izberi igralca.');
             }
         };
-
         document.getElementById('remove-coach').onclick = function() {
             let selectedCoach = document.querySelector('input[name="coach"]:checked');
             if (selectedCoach) {
-                window.location.href = '/odstrani_trenerja/' + selectedCoach.value;
+                "{{url('odstrani_trenerja', coach_id=selectedCoach.value)}}"
             } else {
                 alert('Prosim izberi trenerja.');
             }
