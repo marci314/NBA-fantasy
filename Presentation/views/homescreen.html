@@ -131,11 +131,11 @@
             <form method="GET" action="{{url('spreminjaj_trenerja')}}">
                 <button class="btn">Dodaj trenerja</button>
             </form>
-            <form action="{{url('odstrani_igralca', player_id=player_id)}}" method="POST">
-                <button id="remove-player" type="submit">Odstrani_igralca</button>
+            <form action="{{url('odstrani_igralca', player_id=player_id)}}" method="GET">
+                <button class="btn">Odstrani_igralca</button>
             </form>
-            <form action="{{url('odstrani_trenerja', coach_id=coach_id)}}" method="POST">
-                <button id="remove-coach" type="submit">Odstrani_trenerja</button>
+            <form action="{{url('odstrani_trenerja', coach_id=coach_id)}}" method="GET">
+                <button class="btn">Odstrani_trenerja</button>
             </form>
             <form method="GET" action="{{url('prikazi_lestvico')}}">
                 <button class="btn">Poglej lestvico</button>
