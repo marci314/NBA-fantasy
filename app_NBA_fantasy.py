@@ -136,7 +136,7 @@ def domov():
 
     return template('homescreen.html', players=players, coach=coach)
 
-@get('/odstrani_igralca/<player_id>')
+@post('/odstrani_igralca/<player_id>')
 @cookie_required
 def odstrani_igralca(player_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
@@ -174,7 +174,7 @@ def prikazi_lestvico():
     """)
     teams = repo.cur.fetchall()
 
-    return template('lestvica.html', teams=teams)
+    return template('lestvica.html', teams=list(enumerate(teams, start=1)))
 
 
 @route('/izberi_datum', method=['GET', 'POST'])
@@ -199,13 +199,12 @@ def spreminjaj_igralce():
     players = repo.cur.fetchall()
     return template('spreminjaj_igralce.html', players=players, error=None)
 
-@post('/dodaj_igralca')
-def dodaj_igralca():
+@post('/dodaj_igralca/<player_id>')
+def dodaj_igralca(player_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
         return redirect(url('prijava_get'))
 
-    player_id = request.forms.get('player')
     if not player_id:
         players = repo.get_all_players()
         return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
@@ -216,7 +215,15 @@ def dodaj_igralca():
         f_ekipa_id = repo.cur.fetchone()[0]
 
     rezultat = repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
-    players = repo.get_all_players()
+
+    # Ponovno pridobi igralce iz baze podatkov za prikaz v predlogi
+    repo.cur.execute("""
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni ekipe') AS id_ekipa
+        FROM igralec
+        LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
+    """)
+    players = repo.cur.fetchall()
+
     if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
         return template('spreminjaj_igralce.html', players=players, error=rezultat)  # Prikaz napake v predlogi
     return redirect(url('spreminjaj_igralce'))
@@ -232,7 +239,7 @@ def spreminjaj_trenerja():
     coaches = repo.cur.fetchall()
     return template('spreminjaj_trenerja.html', coaches=coaches, error=None)
 
-@get('/dodaj_trenerja/<coach_id>')
+@post('/dodaj_trenerja/<coach_id>')
 def dodaj_trenerja(coach_id):
     uporabnisko_ime = request.get_cookie("uporabnisko_ime")
     if not uporabnisko_ime:
