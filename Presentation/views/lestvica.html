@@ -89,7 +89,7 @@
                 % for index, team in teams:
                 <tr>
                     <td>{{index}}</td> <!-- Mesto ekipe -->
-                    <td><a href="{{url('prikazi_ekipo', ekipa_id=team[0])}}"></a>{{team[1]}}</td>
+                    <td><a href="{{url('prikazi_ekipo', ekipa_id=team['f_ekipa_id'])}}">{{team[1]}}</a></td>
                     <td>{{team[2]}}</td>
                 </tr>
                 % end
