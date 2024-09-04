@@ -16,7 +16,7 @@ RELOADER = os.environ.get('BOTTLE_RELOADER', True)
 
 TEMPLATE_PATH.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'Presentation/views')))
 
-# Vsa povezava z bazo podatkov se zgodi v objektu repo
+
 repo = Repo()
 auth_service = AuthService()
 
@@ -107,7 +107,6 @@ def domov():
 
     cur = auth_service.cur
 
-    # Preveri igralce
     repo.cur.execute("""
         SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, igralci_ekipe.id_ekipa
         FROM igralec
@@ -118,7 +117,6 @@ def domov():
     """, (user.uporabnik_id,))
     players = repo.cur.fetchall()
 
-    # Preveri trenerja
     repo.cur.execute("""
         SELECT trener.trener_id, trener.ime, trener.rojstvo, trenerji_ekipe.ekipa_id
         FROM trener
@@ -177,18 +175,6 @@ def prikazi_lestvico():
     return template('lestvica.html', teams=list(enumerate(teams, start=1)))
 
 
-@route('/izberi_datum', method=['GET', 'POST'])
-def izberi_datum():
-    if request.method == 'POST':
-        izbrani_datum = request.forms.get('datum')
-        izbrani_datum = datetime.datetime.strptime(izbrani_datum, '%Y-%m-%d').date()
-        
-        rezultat = repo.odigraj_teden(izbrani_datum)
-        
-        return template('odigrane_tekme', rezultat=rezultat)
-    
-    return template('izberi_datum_form')
-
 @get('/spreminjaj_igralce')
 def spreminjaj_igralce():
     repo.cur.execute("""
@@ -232,7 +218,6 @@ def dodaj_igralca(player_id):
 
     rezultat = repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
 
-    # Ponovno pridobi igralce iz baze podatkov za prikaz v predlogi
     repo.cur.execute("""
         SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni ekipe') AS id_ekipa
         FROM igralec
@@ -242,7 +227,7 @@ def dodaj_igralca(player_id):
 
 
     if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
-        return template('spreminjaj_igralce.html', players=players, error=rezultat)  # Prikaz napake v predlogi
+        return template('spreminjaj_igralce.html', players=players, error=rezultat)  
     return redirect(url('spreminjaj_igralce'))
 
 
@@ -269,14 +254,13 @@ def dodaj_trenerja(coach_id):
     rezultat = repo.dodaj_trenerja_v_fantasy_ekipo(f_ekipa_id, coach_id)
     
     if "Ekipa že ima trenerja." in rezultat:
-        # Ponovno pridobi trenerje iz baze podatkov za prikaz v predlogi
         repo.cur.execute("""
             SELECT trener.trener_id, trener.ime, trener.rojstvo, COALESCE(trenerji_ekipe.ekipa_id, 'Ni ekipe') AS ekipa_id
             FROM trener
             LEFT JOIN trenerji_ekipe ON trenerji_ekipe.trener_id = trener.trener_id
         """)
         coaches = repo.cur.fetchall()
-        return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)  # Prikaz napake v predlogi
+        return template('spreminjaj_trenerja.html', coaches=coaches, error=rezultat)  
     
     return redirect(url('spreminjaj_trenerja'))
 
@@ -285,10 +269,8 @@ def dodaj_trenerja(coach_id):
 def prikazi_ekipo(ekipa_id):
     cur = auth_service.cur
 
-    # Initialize error as None
     error = None
 
-    # Pridobimo podatke o ekipi
     repo.cur.execute("""
         SELECT ime_ekipe, tocke
         FROM fantasy_ekipa
@@ -300,7 +282,6 @@ def prikazi_ekipo(ekipa_id):
         error = "Ekipa ne obstaja."
         return template('ekipa.html', team=None, players=[], coach=None, error=error)
 
-    # Pridobimo igralce v ekipi
     repo.cur.execute("""
         SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo
         FROM igralec
@@ -309,7 +290,6 @@ def prikazi_ekipo(ekipa_id):
     """, (ekipa_id,))
     players = repo.cur.fetchall()
 
-    # Pridobimo trenerja v ekipi
     repo.cur.execute("""
         SELECT trener.trener_id, trener.ime, trener.rojstvo
         FROM trener
@@ -329,7 +309,6 @@ def spored_tekem():
 @get('/tekma/<id_tekma>')
 def prikazi_tekmo(id_tekma):
     try:
-        # Pridobimo domačo in gostujočo ekipo
         repo.cur.execute("""
             SELECT domaca_ekipa, gostujoca_ekipa
             FROM tekma
@@ -340,7 +319,6 @@ def prikazi_tekmo(id_tekma):
         domaca_ekipa = tekma[0]
         gostujoca_ekipa = tekma[1]
 
-        # Pridobimo igralce domače ekipe
         repo.cur.execute("""
             SELECT i.igralec_id, i.ime, i.pozicija, i.visina, i.rojstvo
             FROM igralec i
@@ -349,7 +327,6 @@ def prikazi_tekmo(id_tekma):
         """, (domaca_ekipa,))
         domaci_igralci = repo.cur.fetchall()
 
-        # Pridobimo trenerja domače ekipe
         repo.cur.execute("""
             SELECT tr.trener_id, tr.ime, tr.rojstvo
             FROM trener tr
@@ -358,7 +335,6 @@ def prikazi_tekmo(id_tekma):
         """, (domaca_ekipa,))
         domaci_trener = repo.cur.fetchone()
 
-        # Pridobimo igralce gostujoče ekipe
         repo.cur.execute("""
             SELECT i.igralec_id, i.ime, i.pozicija, i.visina, i.rojstvo
             FROM igralec i
@@ -367,7 +343,6 @@ def prikazi_tekmo(id_tekma):
         """, (gostujoca_ekipa,))
         gostujoci_igralci = repo.cur.fetchall()
 
-        # Pridobimo trenerja gostujoče ekipe
         repo.cur.execute("""
             SELECT tr.trener_id, tr.ime, tr.rojstvo
             FROM trener tr
@@ -396,10 +371,10 @@ def prikazi_izbor_tekem():
     try:
         repo.cur.execute("SELECT DISTINCT datum FROM tekma ORDER BY datum ASC")
         dates = repo.cur.fetchall()
-        dates = [row[0] for row in dates]  # Pretvorimo v seznam datumov
-        return template('izberi_okno.html', dates=dates, error=None)  # Dodaj error=None, če ni napake
+        dates = [row[0] for row in dates] 
+        return template('izberi_okno.html', dates=dates, error=None)  
     except Exception as e:
-        return template('izberi_okno.html', dates=[], error=str(e))  # Če pride do napake, posreduj napako
+        return template('izberi_okno.html', dates=[], error=str(e))  
 
 
 def pridobi_tekme_v_casovnem_oknu(conn, zacetni_datum, koncni_datum):
@@ -410,7 +385,7 @@ def pridobi_tekme_v_casovnem_oknu(conn, zacetni_datum, koncni_datum):
             WHERE datum BETWEEN %s AND %s
         """, (zacetni_datum, koncni_datum))
         tekme = repo.cur.fetchall()
-    return [tekma[0] for tekma in tekme]  # Seznam ID-jev tekem
+    return [tekma[0] for tekma in tekme]  
 
 
 def pridobi_podatke_o_tekmi(conn, id_tekem):
@@ -425,17 +400,13 @@ def pridobi_podatke_o_tekmi(conn, id_tekem):
 
 
 def posodobi_tocke_za_fantasy_ekipe(conn, id_tekem, cur):
-    """
-    Posodobi točke za vse fantasy ekipe na podlagi tekem, ki so se zgodile v izbranem časovnem oknu.
-    """
-    # Pridobi vse fantasy ekipe
+
     repo.cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa")
     ekipe = repo.cur.fetchall()
 
     for ekipa in ekipe:
         f_ekipa_id = ekipa[0]
-        
-        # Pridobi igralce iz te fantasy ekipe
+
         repo.cur.execute("""
             SELECT igralec_id 
             FROM fantasy_ekipa_igralci 
@@ -448,7 +419,6 @@ def posodobi_tocke_za_fantasy_ekipe(conn, id_tekem, cur):
         
         skupne_tocke = 0
         
-        # Pridobi podatke o tekmah za te igralce
         repo.cur.execute("""
             SELECT * 
             FROM podatki_o_tekmi 
@@ -457,12 +427,10 @@ def posodobi_tocke_za_fantasy_ekipe(conn, id_tekem, cur):
         """, ([igralec[0] for igralec in igralci], id_tekem))
         podatki_o_tekmi = repo.cur.fetchall()
         
-        # Izračunaj točke za vsako tekmo
         for podatki in podatki_o_tekmi:
             tocke = izracunaj_tocke(podatki)
             skupne_tocke += tocke
         
-        # Posodobi točke v bazi za to fantasy ekipo
         repo.cur.execute("""
             UPDATE fantasy_ekipa 
             SET tocke = tocke + %s 
@@ -475,7 +443,6 @@ def simuliraj_tekme(conn, zacetni_datum, koncni_datum):
     Simulira tekme v izbranem časovnem oknu in posodobi točke za fantasy ekipe.
     """
     with conn.cursor() as cur:
-        # Pridobi ID-je tekem, ki so se zgodile v izbranem časovnem oknu
         repo.cur.execute("""
             SELECT id_tekma 
             FROM tekma 
@@ -486,7 +453,6 @@ def simuliraj_tekme(conn, zacetni_datum, koncni_datum):
         if not id_tekem:
             raise Exception("V izbranem časovnem oknu ni tekem.")
 
-        # Posodobi točke za vse fantasy ekipe na podlagi teh tekem
         posodobi_tocke_za_fantasy_ekipe(conn, id_tekem, cur)
 
         conn.commit()
@@ -525,17 +491,14 @@ def simuliraj_tekme_route():
         simuliraj_tekme(repo.conn, zacetni_datum, koncni_datum)
         return redirect(url('domov'))
     except Exception as e:
-        # V primeru napake vrnemo datume in napako
         return template('izberi_okno.html', error=str(e), dates=dates)
     
 @get('/ponastavi_tocke')
 def ponastavi_tocke():
     try:
-        # Posodobi vse ekipe, da imajo točke enake 0
         repo.cur.execute("UPDATE fantasy_ekipa SET tocke = 0")
         repo.conn.commit()
     except Exception:
-        # Ne izpiše napake, ampak vseeno preusmeri
         pass
     return redirect(url('prikazi_lestvico')) 
 
