@@ -543,9 +543,5 @@ def ponastavi_tocke():
 def pravila():
     return template('pravila.html')
 
-@app.get('/pravila')
-def pravila():
-    return template('pravila.html')
-
 if __name__ == '__main__':
     run(host='localhost', port=SERVER_PORT, reloader=RELOADER)
