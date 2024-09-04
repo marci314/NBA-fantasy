@@ -14,7 +14,7 @@ Statistične podatke o tekmah in igralcih sva pridobila s spletnih strani [baske
 
 ### ER diagram
 
-![ER diagram](Presentation/static/Images/opber3.png)
+Povezava do [ER](https://github.com/marci314/NBA-fantasy-app/blob/main/Presentation/static/Images/opber3.png) diagrama.
 
 
 
