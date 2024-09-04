@@ -2,7 +2,7 @@
 Projektna naloga pri predmetu Osnove podatkovnih baz.
 
 Povezava za zagon z orodjem Binder:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/marci314/NBA-fantasy-app.git/poskus?urlpath=proxy/8081/)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/marci314/NBA-fantasy-app.git/main?urlpath=proxy/8081/)
 
 ## Opis
 
