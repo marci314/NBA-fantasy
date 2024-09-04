@@ -1,10 +1,8 @@
 import datetime
 import os
-
 import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
-
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) 
 import math
 from datetime import date
@@ -12,6 +10,7 @@ from typing import Callable, Dict, List, Type, TypeVar
 
 import Data.auth_public as auth
 from Data.Modeli import *
+
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 

@@ -195,6 +195,7 @@ def spreminjaj_igralce():
         SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni igral v tem časovnem oknu') AS id_ekipa
         FROM igralec
         LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
+        LEFT JOIN ekipa ON ekipa.ekipa_id = igralci_ekipe.id_ekipa
     """)
     players = repo.cur.fetchall()
     return template('spreminjaj_igralce.html', players=players, error=None)
@@ -209,10 +210,25 @@ def dodaj_igralca(player_id):
         players = repo.get_all_players()
         return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
 
+
     user = auth_service.klice_uporabnika(uporabnisko_ime)
+
     with auth_service.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
         repo.cur.execute("SELECT f_ekipa_id FROM fantasy_ekipa WHERE lastnik = %s", (user.uporabnik_id,))
         f_ekipa_id = repo.cur.fetchone()[0]
+
+        cur.execute("""
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, 
+               COALESCE(ekipa.ekipa_ime, 'Ni ekipe') AS ekipa_ime
+        FROM igralec
+        LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
+        LEFT JOIN ekipa ON ekipa.ekipa_id = igralci_ekipe.id_ekipa
+        """)
+        players = cur.fetchall()
+
+    player_id = request.forms.get('player')
+    if not player_id:
+        return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
 
     rezultat = repo.dodaj_igralca_v_fantasy_ekipo(f_ekipa_id, player_id)
 
@@ -223,6 +239,7 @@ def dodaj_igralca(player_id):
         LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
     """)
     players = repo.cur.fetchall()
+
 
     if "Ekipa ima že 5 igralcev." in rezultat or "Igralec je že v ekipi." in rezultat:
         return template('spreminjaj_igralce.html', players=players, error=rezultat)  # Prikaz napake v predlogi
@@ -523,6 +540,10 @@ def ponastavi_tocke():
     return redirect(url('prikazi_lestvico')) 
 
 @get('/pravila')
+def pravila():
+    return template('pravila.html')
+
+@app.get('/pravila')
 def pravila():
     return template('pravila.html')
 
