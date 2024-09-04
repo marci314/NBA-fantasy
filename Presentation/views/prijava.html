@@ -68,6 +68,10 @@
         .btn:hover {
             background-color: #0056b3;
         }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +80,9 @@
             <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         </div>
         <h1>Prijava</h1>
+        % if napaka:
+        <p class="error-message">{{napaka}}</p>
+        % end
         <form action="{{url('prijava_post')}}" method="post">
             <div class="input-group">
                 <label for="username">Uporabniško ime:</label>
@@ -85,7 +92,7 @@
                 <label for="password">Geslo:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <div class="btn-container">
+            <div>
                 <form method="POST" action="{{url('prijava_post')}}">
                     <button type="submit" class="btn">Prijava</button>
                 </form>
