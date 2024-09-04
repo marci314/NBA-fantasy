@@ -226,7 +226,7 @@ def dodaj_igralca(player_id):
         """)
         players = cur.fetchall()
 
-    player_id = request.forms.get('player')
+
     if not player_id:
         return template('spreminjaj_igralce.html', players=players, error="Prosim izberi igralca.")
 
