@@ -65,7 +65,8 @@
 
         .button-container {
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Spremeni to na column, da se gumbe poravnajo en pod drugim */
+            align-items: center; /* Poravnaj gumbe na sredino */
             gap: 10px;
         }
     </style>
@@ -95,13 +96,13 @@
                     % end
                 </select>
             </div>
-            <button type="submit">Odigraj Tekme</button>
-        </form>
             <div class="button-container">
+                <button type="submit">Odigraj Tekme</button>
                 <form method="GET" action="{{url('domov')}}">
                     <button class="btn">Nazaj</button>
                 </form>
             </div>
+        </form>
     </div>
 </body>
 </html>
