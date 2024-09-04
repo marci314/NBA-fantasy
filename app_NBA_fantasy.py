@@ -192,7 +192,7 @@ def izberi_datum():
 @get('/spreminjaj_igralce')
 def spreminjaj_igralce():
     repo.cur.execute("""
-        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni ekipe') AS id_ekipa
+        SELECT igralec.igralec_id, igralec.ime, igralec.pozicija, igralec.visina, igralec.rojstvo, COALESCE(igralci_ekipe.id_ekipa, 'Ni igral v tem časovnem oknu') AS id_ekipa
         FROM igralec
         LEFT JOIN igralci_ekipe ON igralci_ekipe.id_igralca = igralec.igralec_id
     """)
