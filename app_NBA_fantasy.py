@@ -99,6 +99,8 @@ def dodaj_ekipo_ob_registraciji(user_id, teamname):
         auth_service.conn.rollback()
         raise e
 
+#-------------------------------------------SPREMINJANJE EKIPE-------------------------------------------------------
+
 @get('/homescreen')
 @cookie_required
 def domov():
@@ -300,6 +302,8 @@ def prikazi_ekipo(ekipa_id):
 
     return template('ekipa.html', team=team, players=players, coach=coach, error=error)
 
+#-------------------------------------------SPORED TEKEM-------------------------------------------------------
+
 @get('/spored_tekem')
 def spored_tekem():
     repo.cur.execute("SELECT id_tekma, domaca_ekipa, gostujoca_ekipa, datum FROM tekma")
@@ -365,6 +369,8 @@ def prikazi_tekmo(id_tekma):
                         gostujoci_igralci=[],
                         gostujoci_trener=None,
                         error=str(e))
+
+#-------------------------------------------SIMULACIJA TEKEM-------------------------------------------------------
 
 @get('/simuliraj_tekme')
 def prikazi_izbor_tekem():
@@ -505,6 +511,8 @@ def ponastavi_tocke():
 @get('/pravila')
 def pravila():
     return template('pravila.html')
+
+#---------------------------------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     run(host='localhost', port=SERVER_PORT, reloader=RELOADER)
