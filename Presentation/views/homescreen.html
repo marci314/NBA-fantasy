@@ -8,13 +8,12 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: "{{url('static_files', filename='trophies.jpg')}}" no-repeat center center fixed;
             background-size: cover;
             color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Poskrbi, da bo telo imelo višino celotnega okna brskalnika */
+            height: 100vh;
         }
 
         .container {
@@ -22,8 +21,8 @@
             flex-direction: column;
             width: 100%;
             max-width: 1200px;
-            margin: auto; /* Vertikalno in horizontalno centriranje */
-            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            margin: auto; 
+            background-color: rgba(255, 255, 255, 0.85); 
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -32,7 +31,7 @@
         header {
             width: 100%;
             padding: 10px;
-            background-color: rgba(233, 233, 233, 0.85); /* Prosojno ozadje za header */
+            background-color: rgba(233, 233, 233, 0.85); 
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -48,13 +47,13 @@
 
         .sidebar {
             width: 150px;
-            background-color: rgba(233, 233, 233, 0.85); /* Prosojna stranska vrstica */
+            background-color: rgba(233, 233, 233, 0.85); 
             padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: fixed;
-            top: 50px; /* Align with the header */
+            top: 50px; 
             right: 0;
             height: calc(100% - 50px);
             box-shadow: -2px 0 5px rgba(0,0,0,0.1);
@@ -62,7 +61,7 @@
         }
 
         .sidebar button, .sidebar form button {
-            width: 100%;
+            width: 150px; 
             margin-bottom: 10px;
             padding: 10px;
             background-color: #007bff;
@@ -71,10 +70,10 @@
             border-radius: 4px;
             cursor: pointer;
             text-align: center;
-            box-sizing: border-box; /* Ensure buttons fill the width */
+            box-sizing: border-box; 
         }
         .btn {
-            width: 100%; /* Make the button take up 100% of its container's width */
+            width: 100%; 
             padding: 10px;
             font-size: 16px;
             background-color: #007bff;
@@ -84,7 +83,7 @@
             cursor: pointer;
             margin-bottom: 10px;
             transition: background-color 0.3s ease;
-            box-sizing: border-box; /* Ensure padding is included in the button's width calculation */
+            box-sizing: border-box; 
         }
 
         .sidebar button:hover, .sidebar form button:hover {
@@ -99,11 +98,11 @@
         main {
             flex-grow: 1;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.85); /* Prosojno ozadje */
+            background-color: rgba(255, 255, 255, 0.85); 
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-right: 170px; /* Make space for the fixed sidebar */
+            margin-right: 170px; 
             border-radius: 10px;
         }
 
@@ -111,7 +110,7 @@
             width: 80%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            background-color: rgba(255, 255, 255, 0.95); /* Prosojna miza */
+            background-color: rgba(255, 255, 255, 0.95); 
             border-radius: 10px;
         }
 
@@ -126,7 +125,7 @@
         }
     </style>
 </head>
-<body>
+<body background="{{url('static_files', filename='trophies.jpg')}}">
     <div class="container">
         <header>
             <h1>Moja Ekipa</h1>
