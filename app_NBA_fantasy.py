@@ -522,5 +522,9 @@ def ponastavi_tocke():
         pass
     return redirect(url('prikazi_lestvico')) 
 
+@get('/pravila')
+def pravila():
+    return template('pravila.html')
+
 if __name__ == '__main__':
     run(host='localhost', port=SERVER_PORT, reloader=RELOADER)

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lestvica - NBA Fantasy League</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('/static/Images/doncic.jpg') no-repeat center center fixed;
+            background-size: cover; /* Prilagodi sliko širini strani */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            background-color: rgba(255, 255, 255, 0.75); /* Bele barve z malo prosojnosti */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 25px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.95); /* Prosojna miza */
+            border-radius: 10px;
+        }
+
+        thead {
+            background-color: #f1f1f1;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Dodaj razmik med gumbi */
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Za kaj sploh gre?</h2>
+        <p>
+            Cilj igre je pridobiti čim več točk s svojo fantazijsko ekipo. Točke igralec (uporabnik) dobi tako, da v svojo ekipo izbere do pet košarkarjev iz NBA in enega trenerja. Ti mu nato na podlagi svoje igre prinašajo točke, ki jih pridobijo z zadetimi koši, asistencami, skoki, ... Če ima igralec veliko izgubljenih žog, je njegov doprinos lahko tudi negativen.
+        </p>
+        <p>
+            Aplikacija simulira tekme iz sezone 2023/24, in sicer v obdobju nekaj tednov po zimskem prestopnem roku in po tekm All Star. Uporabnik lahko tekme simulira vse hkrati, lahko pa se po koledarju premika tudi počasneje in morda celo dnevno posodablja svojo ekipo.
+        </p>
+        <form method="GET" action="{{url('domov')}}">
+            <button class="btn">Nazaj</button>
+        </form>
+    </div>
+</body>
+</html>
