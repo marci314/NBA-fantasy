@@ -8,7 +8,6 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('/static/Images/players.jpg') no-repeat center center fixed;
             background-size: cover;
             display: flex;
             flex-direction: column;
@@ -24,7 +23,7 @@
             width: 100%;
             max-width: 1200px;
             margin: auto;
-            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            background-color: rgba(255, 255, 255, 0.85); 
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -37,13 +36,13 @@
         }
 
         .table-container {
-            max-height: 400px; /* Omeji višino vsebnika za tabelo */
-            overflow-y: auto; /* Omogoči notranje skrolanje */
-            width: 100%; /* Določi širino vsebnika */
-            margin-bottom: 20px; /* Dodaj nekaj prostora pod tabelo */
-            border: 1px solid #ddd; /* Dodaj rob okoli vsebnika */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Rahla senca okoli tabele */
-            background-color: rgba(255, 255, 255, 0.95); /* Prosojno ozadje tabele */
+            max-height: 400px; 
+            overflow-y: auto; 
+            width: 100%; 
+            margin-bottom: 20px;
+            border: 1px solid #ddd; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.95); 
             border-radius: 10px;
         }
 
@@ -92,7 +91,7 @@
         }
     </style>
 </head>
-<body>
+<body background="{{url('static_files', filename='players.jpg')}}">
     <div class="container">
         <h1>Dodaj Igralce</h1>
 
@@ -100,7 +99,6 @@
         <p class="error">{{error}}</p>
         % end
 
-        <form action="/dodaj_igralca" method="post">
             <div class="table-container">
                 <table id="player-table">
                     <thead>
@@ -116,7 +114,11 @@
                     <tbody>
                         % for player in players:
                         <tr>
-                            <td><input type="radio" name="player" value="{{player[0]}}"></td>
+                            <td>
+                                <form action="{{url('dodaj_igralca', player_id=player[0])}}" method="post">
+                                    <button class="btn">Dodaj</button>
+                                </form>
+                                </td>
                             <td>{{player[1]}}</td>
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
@@ -128,10 +130,10 @@
                 </table>
             </div>
             <div class="button-container">
-                <button type="submit">Dodaj igralca</button>
-            </div>
-        </form>
-        <button onclick="window.location.href='/homescreen'">Nazaj</button>
+            <form method="GET" action="{{url('domov')}}">
+                <button class="btn">Nazaj</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

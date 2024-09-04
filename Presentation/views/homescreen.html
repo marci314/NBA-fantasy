@@ -8,13 +8,12 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('/static/Images/trophies.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Poskrbi, da bo telo imelo višino celotnega okna brskalnika */
+            height: 100vh;
         }
 
         .container {
@@ -22,8 +21,8 @@
             flex-direction: column;
             width: 100%;
             max-width: 1200px;
-            margin: auto; /* Vertikalno in horizontalno centriranje */
-            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            margin: auto; 
+            background-color: rgba(255, 255, 255, 0.85); 
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -32,7 +31,7 @@
         header {
             width: 100%;
             padding: 10px;
-            background-color: rgba(233, 233, 233, 0.85); /* Prosojno ozadje za header */
+            background-color: rgba(233, 233, 233, 0.85); 
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -48,13 +47,13 @@
 
         .sidebar {
             width: 150px;
-            background-color: rgba(233, 233, 233, 0.85); /* Prosojna stranska vrstica */
+            background-color: rgba(233, 233, 233, 0.85); 
             padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: fixed;
-            top: 10px; /* Align with the header */
+            top: 50px; 
             right: 0;
             height: calc(100% - 50px);
             box-shadow: -2px 0 5px rgba(0,0,0,0.1);
@@ -62,7 +61,7 @@
         }
 
         .sidebar button, .sidebar form button {
-            width: 100%;
+            width: 150px; 
             margin-bottom: 10px;
             padding: 10px;
             background-color: #007bff;
@@ -71,7 +70,20 @@
             border-radius: 4px;
             cursor: pointer;
             text-align: center;
-            box-sizing: border-box; /* Ensure buttons fill the width */
+            box-sizing: border-box; 
+        }
+        .btn {
+            width: 100%; 
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box; 
         }
 
         .sidebar button:hover, .sidebar form button:hover {
@@ -86,11 +98,11 @@
         main {
             flex-grow: 1;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.85); /* Prosojno ozadje */
+            background-color: rgba(255, 255, 255, 0.85); 
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-right: 170px; /* Make space for the fixed sidebar */
+            margin-right: 170px; 
             border-radius: 10px;
         }
 
@@ -98,7 +110,7 @@
             width: 80%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            background-color: rgba(255, 255, 255, 0.95); /* Prosojna miza */
+            background-color: rgba(255, 255, 255, 0.95); 
             border-radius: 10px;
         }
 
@@ -113,22 +125,34 @@
         }
     </style>
 </head>
-<body>
+<body background="{{url('static_files', filename='trophies.jpg')}}">
     <div class="container">
         <header>
             <h1>Moja Ekipa</h1>
         </header>
         <div class="sidebar">
-            <button onclick="window.location.href='/odjava'">Odjava</button>
-            <button onclick="window.location.href='/simuliraj_tekme'">Simuliraj tekme</button>
-            <button onclick="window.location.href='/spreminjaj_igralce'">Dodaj igralce</button>
-            <button onclick="window.location.href='/spreminjaj_trenerja'">Dodaj trenerja</button>
-            <button id="remove-player">Odstrani igralca</button>
-            <button id="remove-coach">Odstrani trenerja</button>
-            <button onclick="window.location.href='/lestvica'">Poglej lestvico</button>
-            <button onclick="window.location.href='/spored_tekem'">Spored tekem</button>
-            <button onclick="window.location.href='/pravila'">Pravila</button>
-            <img src="/static/Images/nba-logo.jpg" alt="Logo">
+            <form method="GET" action="{{url('odjava')}}">
+                <button class="btn">Odjava</button>
+            </form>
+            <form method="GET" action="{{url('prikazi_izbor_tekem')}}">
+                <button class="btn">Simuliraj tekme</button>
+            </form>
+            <form method="GET" action="{{url('spreminjaj_igralce')}}">
+                <button class="btn">Dodaj igralce</button>
+            </form>
+            <form method="GET" action="{{url('spreminjaj_trenerja')}}">
+                <button class="btn">Dodaj trenerja</button>
+            </form>
+            <form method="GET" action="{{url('prikazi_lestvico')}}">
+                <button class="btn">Poglej lestvico</button>
+            </form>
+            <form method="GET" action="{{url('spored_tekem')}}">
+                <button class="btn">Spored tekem</button>
+            </form>
+            <form method="GET" action="{{url('pravila')}}">
+                <button class="btn">Pravila</button>
+            </form>
+            <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         </div>
         <main>
             <h2>Igralci</h2>
@@ -147,7 +171,11 @@
                     % if players:
                         % for player in players:
                         <tr>
-                            <td><input type="radio" name="player" value="{{player[0]}}"></td>
+                            <td>
+                            <form action="{{url('odstrani_igralca', player_id=player[0])}}" method="post">
+                                <button class="btn">Odstrani</button>
+                            </form>
+                            </td>
                             <td>{{player[1]}}</td>
                             <td>{{player[2]}}</td>
                             <td>{{player[3]}}</td>
@@ -175,7 +203,11 @@
                 <tbody>
                     % if coach:
                         <tr>
-                            <td><input type="radio" name="coach" value="{{coach[0]}}"></td>
+                            <td>
+                                <form action="{{url('odstrani_trenerja', coach_id=coach[0])}}" method="get">
+                                    <button type="submit" class="btn">Odstrani</button>
+                                </form>
+                            </td>
                             <td>{{coach[1]}}</td>
                             <td>{{coach[2]}}</td>
                             <td>{{coach[3]}}</td> 
@@ -189,24 +221,5 @@
             </table>
         </main>
     </div>
-    <script>
-        document.getElementById('remove-player').onclick = function() {
-            let selectedPlayer = document.querySelector('input[name="player"]:checked');
-            if (selectedPlayer) {
-                window.location.href = '/odstrani_igralca/' + selectedPlayer.value;
-            } else {
-                alert('Prosim izberi igralca.');
-            }
-        };
-
-        document.getElementById('remove-coach').onclick = function() {
-            let selectedCoach = document.querySelector('input[name="coach"]:checked');
-            if (selectedCoach) {
-                window.location.href = '/odstrani_trenerja/' + selectedCoach.value;
-            } else {
-                alert('Prosim izberi trenerja.');
-            }
-        };
-    </script>
 </body>
 </html>

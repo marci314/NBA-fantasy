@@ -24,10 +24,10 @@
             box-sizing: border-box;
         }
         .create-account-container img {
-            max-width: 100%;  /* Prilagodi širino slike kontejnerju */
-            height: auto;  /* Ohranimo razmerje stranic slike */
+            max-width: 100%; 
+            height: auto;
             margin-bottom: 20px;
-            border-radius: 8px;  /* Rahlo zaobljeni robovi za boljši izgled */
+            border-radius: 8px; 
         }
         .create-account-container input {
             width: calc(100% - 22px);
@@ -59,15 +59,19 @@
 </head>
 <body>
     <div class="create-account-container">
-        <img src="/static/Images/nba-logo.jpg" alt="NBA Logo">
+        <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         <h2>Ustvari Račun</h2>
-        <form action="/registracija" method="post">
+        <form action="{{url('registracija_post')}}" method="post">
             <input type="text" name="username" placeholder="Uporabniško ime" required>
             <input type="password" name="password" placeholder="Geslo" required>
             <input type="text" name="teamname" placeholder="Ime ekipe" required>
             <div>
-                <button type="submit">Ustvari račun</button>
-                <button type="button" onclick="window.location.href='/'">Nazaj</button>
+                <form method="POST" action="{{url('registracija_post')}}">
+                    <button type="submit" class="btn">Ustvari račun</button>
+                </form>
+                <form method="GET" action="{{url('domaca_stran')}}">
+                    <button class="btn">Nazaj</button>
+                </form>
             </div>
         </form>
         % if napaka:

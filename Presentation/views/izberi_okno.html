@@ -8,7 +8,6 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('/static/Images/court.jpg') no-repeat center center fixed;
             background-size: cover;
             display: flex;
             flex-direction: column;
@@ -24,7 +23,7 @@
             width: 100%;
             max-width: 600px;
             margin: auto;
-            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            background-color: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -67,11 +66,11 @@
         .button-container {
             display: flex;
             justify-content: center;
-            gap: 10px; /* Razmik med gumbi */
+            gap: 10px;
         }
     </style>
 </head>
-<body>
+<body background="{{url('static_files', filename='court.jpg')}}">
     <div class="container">
         <h1>Izberi Časovno Okno</h1>
         % if error:
@@ -79,7 +78,7 @@
         % else:
         <p class="error"></p>
         % end
-        <form action="/simuliraj_tekme" method="post">
+        <form action="{{url('prikazi_izbor_tekem')}}" method="post">
             <div class="input-container">
                 <label for="start-date">Začetni datum:</label>
                 <select id="start-date" name="start_date" required>
@@ -96,11 +95,13 @@
                     % end
                 </select>
             </div>
-            <div class="button-container">
-                <button type="submit">Odigraj Tekme</button>
-                <button type="button" onclick="window.location.href='/homescreen'">Nazaj</button>
-            </div>
+            <button type="submit">Odigraj Tekme</button>
         </form>
+            <div class="button-container">
+                <form method="GET" action="{{url('domov')}}">
+                    <button class="btn">Nazaj</button>
+                </form>
+            </div>
     </div>
 </body>
 </html>

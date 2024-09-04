@@ -27,9 +27,9 @@
             margin-bottom: 20px;
         }
         .logo img {
-            max-width: 100%;  /* Prilagodi širino slike velikosti kontejnerja */
-            height: auto;  /* Ohranimo razmerje stranic slike */
-            border-radius: 8px;  /* Rahlo zaobljeni robovi za boljši izgled */
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
         }
         .btn {
             width: 100%;
@@ -51,12 +51,16 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="/static/Images/nba-logo.jpg" alt="NBA Fantasy League Logo">
+            <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         </div>
         <h1>NBA Fantasy League</h1>
         <p>Dobrodošli v NBA Fantasy ligi!</p>
-        <button class="btn" onclick="window.location.href='/prijava'">Prijava</button>
-        <button class="btn" onclick="window.location.href='/registracija'">Registracija</button>
+        <form method="GET" action="{{url('prijava_get')}}">
+            <button class="btn">Prijava</button>
+        </form>
+        <form method="GET" action="{{url('registracija_get')}}">
+            <button class="btn">Registracija</button>
+        </form>
     </div>
 </body>
 </html>

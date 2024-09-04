@@ -8,7 +8,6 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('/static/Images/coaches.jpg') no-repeat center center fixed;
             background-size: cover;
             display: flex;
             flex-direction: column;
@@ -24,7 +23,7 @@
             width: 100%;
             max-width: 1200px;
             margin: auto;
-            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            background-color: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -37,13 +36,13 @@
         }
 
         .table-container {
-            max-height: 400px; /* Omeji višino vsebnika za tabelo */
-            overflow-y: auto; /* Omogoči notranje skrolanje */
-            width: 100%; /* Določi širino vsebnika */
-            margin-bottom: 20px; /* Dodaj nekaj prostora pod tabelo */
-            border: 1px solid #ddd; /* Dodaj rob okoli vsebnika */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Rahla senca okoli tabele */
-            background-color: rgba(255, 255, 255, 0.95); /* Prosojno ozadje tabele */
+            max-height: 400px; 
+            overflow-y: auto;
+            width: 100%; 
+            margin-bottom: 20px;
+            border: 1px solid #ddd; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.95); 
             border-radius: 10px;
         }
 
@@ -85,7 +84,7 @@
         }
     </style>
 </head>
-<body>
+<body background="{{url('static_files', filename='coaches.jpg')}}">
     <div class="container">
         <h1>Dodaj Trenerja</h1>
         % if error:
@@ -104,7 +103,11 @@
                 <tbody>
                     % for coach in coaches:
                     <tr>
-                        <td><input type="radio" name="coach" value="{{coach[0]}}"></td>
+                        <td>
+                            <form action="{{url('dodaj_trenerja', coach_id=coach[0])}}" method="post">
+                                <button class="btn">Dodaj</button>
+                            </form>
+                            </td>
                         <td>{{coach[1]}}</td>
                         <td>{{coach[2]}}</td>
                         <td>{{coach[3]}}</td> 
@@ -113,18 +116,9 @@
                 </tbody>
             </table>
         </div>
-        <button id="add-coach">Dodaj trenerja</button>
-        <button onclick="window.location.href='/homescreen'">Nazaj</button>
+        <form method="GET" action="{{url('domov')}}">
+            <button class="btn">Nazaj</button>
+        </form>
     </div>
-    <script>
-        document.getElementById('add-coach').onclick = function() {
-            let selectedCoach = document.querySelector('input[name="coach"]:checked');
-            if (selectedCoach) {
-                window.location.href = '/dodaj_trenerja/' + selectedCoach.value;
-            } else {
-                alert('Prosim izberi trenerja.');
-            }
-        };
-    </script>
 </body>
 </html>

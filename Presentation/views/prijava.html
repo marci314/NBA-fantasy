@@ -27,9 +27,9 @@
             margin-bottom: 20px;
         }
         .logo img {
-            max-width: 100%;  /* Prilagodi širino slike velikosti kontejnerja */
-            height: auto;  /* Ohranimo razmerje stranic slike */
-            border-radius: 8px;  /* Rahlo zaobljeni robovi za boljši izgled */
+            max-width: 100%; 
+            height: auto; 
+            border-radius: 8px; 
         }
         .input-group {
             margin-bottom: 15px;
@@ -68,15 +68,22 @@
         .btn:hover {
             background-color: #0056b3;
         }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">
-            <img src="/static/Images/nba-logo.jpg" alt="NBA Fantasy League Logo">
+            <img src="{{url('static_files', filename='nba-logo.jpg')}}" alt="NBA Fantasy League Logo">
         </div>
         <h1>Prijava</h1>
-        <form action="/prijava" method="post">
+        % if napaka:
+        <p class="error-message">{{napaka}}</p>
+        % end
+        <form action="{{url('prijava_post')}}" method="post">
             <div class="input-group">
                 <label for="username">Uporabniško ime:</label>
                 <input type="text" id="username" name="username" required>
@@ -85,9 +92,13 @@
                 <label for="password">Geslo:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <div class="btn-container">
-                <button type="submit" class="btn">Prijava</button>
-                <button type="button" class="btn" onclick="window.location.href='/'">Nazaj</button>
+            <div>
+                <form method="POST" action="{{url('prijava_post')}}">
+                    <button type="submit" class="btn">Prijava</button>
+                </form>
+                <form method="GET" action="{{url('domaca_stran')}}">
+                    <button class="btn">Nazaj</button>
+                </form>
             </div>
         </form>
     </div>

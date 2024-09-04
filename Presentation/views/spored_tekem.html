@@ -8,8 +8,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('/static/Images/standings.jpg') no-repeat center center fixed;
-            background-size: contain; /* Prilagodi sliko širini strani */
+            background-size: contain; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -24,7 +23,7 @@
             width: 100%;
             max-width: 1200px;
             margin: auto;
-            background-color: rgba(255, 255, 255, 0.85); /* Bele barve z malo prosojnosti */
+            background-color: rgba(255, 255, 255, 0.85); 
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -37,13 +36,13 @@
         }
 
         .table-container {
-            max-height: 400px; /* Omeji višino vsebnika za tabelo */
-            overflow-y: auto; /* Omogoči notranje skrolanje */
-            width: 100%; /* Določi širino vsebnika */
-            margin-bottom: 20px; /* Dodaj nekaj prostora pod tabelo */
-            border: 1px solid #ddd; /* Dodaj rob okoli vsebnika */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Rahla senca okoli tabele */
-            background-color: rgba(255, 255, 255, 0.95); /* Prosojna miza */
+            max-height: 400px;
+            overflow-y: auto; 
+            width: 100%; 
+            margin-bottom: 20px; 
+            border: 1px solid #ddd; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.95); 
             border-radius: 10px;
         }
 
@@ -80,7 +79,7 @@
         }
     </style>
 </head>
-<body>
+<body background="{{url('static_files', filename='standings.jpg')}}">
     <div class="container">
         <h1>Spored Tekem</h1>
         <div class="table-container">
@@ -97,13 +96,16 @@
                     <tr>
                         <td>{{match['domaca_ekipa']}}</td>
                         <td>{{match['gostujoca_ekipa']}}</td>
-                        <td><a href="/tekma/{{match['id_tekma']}}">{{match['datum']}}</a></td>
+                        <td>{{match['datum']}}</td>
+                        <td><a href="{{url('prikazi_tekmo', id_tekma=match['id_tekma'])}}">Več o tekmi</a></td>
                     </tr>
                     % end
                 </tbody>
             </table>
         </div>
-        <button onclick="window.location.href='/homescreen'">Nazaj</button>
+        <form method="GET" action="{{url('domov')}}">
+            <button class="btn">Nazaj</button>
+        </form>
     </div>
 </body>
 </html>
