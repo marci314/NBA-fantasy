@@ -1,44 +1,44 @@
 # NBA-fantasy-app
 
-## Opis
+## Description
 
-Aplikacija je namenjena igranju NBA fantasy league-a. Uporabnik se ob prvi uporabi registrira, izbere ekipo igralcev, ki mu na podlagi resnične statistike odigranih tekem v NBA prinašajo točke. Te igralci dobijo na podlagi svojega uspeha v "resničnih" tekmah - več točk, asistenc, blokov itd. pomeni boljši rezultat, v primeru slabe igre pa lahko igralec dobi tudi negativne točke.
+The application is designed for playing NBA Fantasy Leagues. Upon the first use, the user registers and selects a team of players. These players earn points based on their real-life NBA performance. More points, assists, blocks, etc., mean a better score. If a player performs poorly, they can even receive negative points.
 
- Cilj vsakega uporabnika aplikacije je, da zbere čim več točk. 
+The goal of each user is to collect as many points as possible.
 
-Statistične podatke o tekmah in igralcih sva pridobila s spletnih strani [basketball-reference.com](basketball-reference.com) in [NatStat.com](https://natstat.com/).
+Statistical data on games and players are obtained from websites [basketball-reference.com](basketball-reference.com) and [NatStat.com](https://natstat.com/).
 
 ### ER diagram
 
-Povezava do [ER](https://github.com/marci314/NBA-fantasy-app/blob/main/Presentation/static/Images/opber3.png) diagrama.
+Link to the [ER](https://github.com/marci314/NBA-fantasy-app/blob/main/Presentation/static/Images/opber3.png) diagrama.
 
-### Struktura baze
+### Database Structure
 
-Seznam tabel, ki jih imava v naši bazi:
+List of tables in our database:
 
-- **uporabnik** (uporabnik_id, uporabnisko_ime, geslo, last_login)
-- **fantasy_ekipa** (f_ekipa_id, tocke, lastnik, ime_ekipe)
-- **igralec** (igralec_id, ime, pozicija, visina, rojstvo)
-- **trener** (trener_id, ime, rojstvo)
-- **fantasy_ekipa_trener** (f_ekipa_id, trener_id)
-- **ekipa** (ekipa_id, ekipa_ime)
-- **tekma** (id_tekma, domaca_ekipa, gostujoca_ekipa, domaca_ekipa_tocke, gostujoca_ekipa_tocke, datum)
-- **podatki_o_tekmi** (id_igralca, id_tekme, odstotek_meta, ukradene, bloki, izgubljene, skoki, podaje, odigrane_minute, tocke, izid)
-- **fantasy_ekipa_igralci** (f_ekipa_id, igralec_id)
-- **igralci_tocke** (id_igralca, id_tekme, tocke)
-- **igralci_ekipe** (id_igralca, id_ekipa)
-- **trenerji_ekipe** (trener_id, ekipa_id)
+- **user** (user_id, username, password, last_login)
+- **fantasy_team** (f_team_id, points, owner, team_name)
+- **player** (player_id, name, position, height, birthdate)
+- **coach** (coach_id, name, birthdate)
+- **fantasy_team_coach** (f_team_id, coach_id)
+- **team** (team_id, team_name)
+- **game** (game_id, home_team, away_team, home_team_points, away_team_points, date)
+- **game_data** (player_id, game_id, shooting_percentage, steals, blocks, turnovers, rebounds, assists, minutes_played, points, result)
+- **fantasy_team_players** (f_team_id, player_id)
+- **player_points** (player_id, game_id, points)
+- **team_players** (player_id, team_id)
+- **team_coaches** (coach_id, team_id)
 
-## Navodila za uporabo aplikacije
+## Application Usage Instructions
 
-1. **Registracija:** Po zagonu aplikacije se registrirajte z uporabniškim imenom, geslom in poimenujte svojo fantasy ekipo.
-2. **Prijava:** Prijavite se z vašim uporabniškim imenom in geslom.
-3. **Preberite pravila:** Pojdite na zavihek "Pravila" in si preberite osnovna pravila in potek igre.
-4. **Izbira igralcev in trenerja:** Vsak uporabnik lahko v svojo ekipo izbere največ 5 igralcev in enega trenerja. Predhodno si lahko ogledate ekipe drugih uporabnikov ter spored tekem in se na podlagi tega odločite o svoji izbiri.
-5. **Izberite časovno okno:** V zavihku "Simuliraj tekme" določite časovno okno, v katerem želite simulirat tekme.
-6. **Pregled rezultatov:** Po odigranih tekmah si v zavihku "Poglej lestvico" lahko ogledate uvrstitev vaše fantasy ekipe.
+1. **Registration:** After launching the application, register with a username, password, and name your fantasy team.
+2. **Login:** Log in with your username and password.
+3. **Read the rules:** Go to the "Rules" tab and read the basic rules and how the game works.
+4. **Select players and a coach:** Each user can select up to 5 players and one coach for their team. You can preview other users' teams and the game schedule to help make your decision.
+5. **Select a time window:** In the "Simulate Games" tab, set the time window in which you want to simulate the games.
+6. **Review results:** After the games are played, check the "View Standings" tab to see your fantasy team's ranking.
 
-#### Spletni dostop
+#### Web Access
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/marci314/NBA-fantasy-app.git/main?urlpath=proxy/8081/)
 
